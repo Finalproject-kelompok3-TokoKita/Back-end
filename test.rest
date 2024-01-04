@@ -7,8 +7,8 @@ POST http://localhost:5000/users
 Content-Type: application/json
 
 {
-    "name": "Admin",
-    "email": "admin123@gmail.com",
+    "name": "Admin445",
+    "email": "admin12345@gmail.com",
     "password": "1234567",
     "confPassword": "1234567"
 }
