@@ -1,42 +1,37 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/dbConfig");
+import { Sequelize } from "sequelize";
+import db from "../config/database.js";
 
-const User = sequelize.define(
-  "User",
+const { DataTypes } = Sequelize;
+
+const Users = db.define(
+  "users",
   {
-    username: {
+    name: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
+    },
+    phone: {
+      type: DataTypes.STRING,
+    },
+    DateOfBirth: {
+      type: DataTypes.STRING,
+    },
+    gender: {
+      type: DataTypes.STRING,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    photo: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    refresh_token: {
-      type: DataTypes.TEXT,
-      allowNull: true,
     },
     image: {
       type: DataTypes.STRING,
-      allowNull: true,
     },
     url: {
       type: DataTypes.STRING,
-      allowNull: true,
+    },
+    refresh_token: {
+      type: DataTypes.TEXT,
     },
   },
   {
@@ -44,6 +39,4 @@ const User = sequelize.define(
   }
 );
 
-sequelize.sync();
-
-module.exports = User;
+export default Users;
