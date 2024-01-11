@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
+import User from "./UserModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -20,7 +21,7 @@ const Orders = db.define(
     freezeTableName: true,
   }
 );
-
+Orders.belongsTo(User, { foreignKey: "idUser" });
 export default Orders;
 
 (async () => {

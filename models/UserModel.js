@@ -1,10 +1,12 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
+import Provinces from "./ProvincesModel.js";
+import Cities from "./CitiesModel.js";
 
 const { DataTypes } = Sequelize;
 
 const User = db.define(
-  "users",
+  "User",
   {
     idUser: {
       primaryKey: true,
@@ -28,6 +30,8 @@ const User = db.define(
     freezeTableName: true,
   }
 );
+User.belongsTo(Provinces, { foreignKey: "idProvinces" });
+User.belongsTo(Cities, { foreignKey: "idCities" });
 
 export default User;
 

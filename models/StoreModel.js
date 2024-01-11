@@ -1,5 +1,8 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
+import Provinces from "./ProvincesModel.js";
+import Cities from "./CitiesModel.js";
+import User from "./UserModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -25,6 +28,9 @@ const Store = db.define(
     freezeTableName: true,
   }
 );
+Store.belongsTo(Provinces, { foreignKey: "idProvinces" });
+Store.belongsTo(Cities, { foreignKey: "idCities" });
+Store.belongsTo(User, { foreignKey: "idUser" });
 
 export default Store;
 
