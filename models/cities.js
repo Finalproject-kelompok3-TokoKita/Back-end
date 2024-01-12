@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       cities.hasOne(models.users);
       cities.hasOne(models.store);
-      cities.belongsTo(models.provinces);
+      cities.belongsTo(models.provinces, { foreignKey: "provinceId" });
     }
   }
   cities.init(
