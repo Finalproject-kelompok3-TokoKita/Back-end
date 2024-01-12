@@ -30,8 +30,8 @@ module.exports = {
           key: "id",
           model: "categories",
         },
-        onDelete: "cascade",
         onUpdate: "cascade",
+        onDelete: "cascade",
       },
       storeId: {
         type: Sequelize.INTEGER,
@@ -39,8 +39,8 @@ module.exports = {
           key: "id",
           model: "stores",
         },
-        onDelete: "cascade",
         onUpdate: "cascade",
+        onDelete: "cascade",
       },
       createdAt: {
         allowNull: false,

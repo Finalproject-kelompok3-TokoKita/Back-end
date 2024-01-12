@@ -9,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      cities.belongsTo(models.provinces, { foreignKey: "provinceId" });
       cities.hasOne(models.users);
       cities.hasOne(models.store);
-      cities.belongsTo(models.provinces, { foreignKey: "provinceId" });
     }
   }
   cities.init(

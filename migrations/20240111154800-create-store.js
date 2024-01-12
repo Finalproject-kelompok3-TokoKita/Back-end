@@ -33,8 +33,8 @@ module.exports = {
           key: "id",
           model: "cities",
         },
-        onDelete: "cascade",
         onUpdate: "cascade",
+        onDelete: "cascade",
       },
       provinceId: {
         type: Sequelize.INTEGER,
@@ -42,8 +42,8 @@ module.exports = {
           key: "id",
           model: "provinces",
         },
-        onDelete: "cascade",
         onUpdate: "cascade",
+        onDelete: "cascade",
       },
       createdAt: {
         allowNull: false,
