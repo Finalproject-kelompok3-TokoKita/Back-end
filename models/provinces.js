@@ -17,6 +17,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   provinces.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     name: DataTypes.STRING
   }, {
     sequelize,
