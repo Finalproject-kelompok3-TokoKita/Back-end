@@ -4,6 +4,8 @@ const router = Router();
 const routes = [
     require('./provinces.routes'),
     require('./cities.routes'),
+    require('./user.routes'),
+    require('./auth.routes'),
 ];
 
 routes.forEach((route) => router.use(route))

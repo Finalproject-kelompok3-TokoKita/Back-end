@@ -1,4 +1,4 @@
-const { provinces } = require('../models');
+const { provinces, cities } = require('../models');
 const { DataNotFoundError, BadRequestError } = require('../utils/errors');
 
 const getAll = async (req, res, next) => {
@@ -19,7 +19,8 @@ const getOne = async (req, res, next) => {
         const resultProvince = await provinces.findOne({
             where: {
                 id: id,
-            }
+            },
+            include: [cities]
         });
 
         if (!resultProvince) {
