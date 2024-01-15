@@ -1,4 +1,6 @@
 const { Op } = require("sequelize");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const { users } = require("../models");
 const { PasswordUtilities, JWTUtilities } = require("../utils");
 const { BadRequestError } = require("../utils/errors");
@@ -7,33 +9,40 @@ const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
+    // Logging received credentials
+    console.log("Received credentials:", username, password);
+
     if (!username || !password) {
       throw new BadRequestError("Email/Phone dan password tidak boleh kosong!");
     }
 
     const user = await users.findOne({
       where: {
-        [Op.or]: [
-          {
-            email: username,
-          },
-          {
-            phone: username,
-          },
-        ],
+        email: username,
       },
     });
 
+    // Logging user from database
+    console.log("User from database:", user);
+
     if (!user) {
-      throw new BadRequestError("Email/Phone atau Password salah! ");
+      throw new BadRequestError("Email/Phone atau Password salah!");
     }
 
-    const isValidPassword = await PasswordUtilities.compare(password, user.password);
+    // Logging sebelum dan sesudah fungsi compare
+    console.log("Before compare: Received password (trimmed):", String(password).trim());
+    console.log("Before compare: User password from database (trimmed):", String(user.password).trim());
+
+    const isValidPassword = bcrypt.compareSync(password, user.password);
+
+    // Logging setelah fungsi compare
+    console.log("After compare: Is password valid?", isValidPassword);
+
     if (!isValidPassword) {
-      throw new BadRequestError("Email/Phone atau Password salah! 2");
+      throw new BadRequestError("Email/Phone atau Password salah! Periksa kembali kata sandi Anda.");
     }
 
-    const token = JWTUtilities.generateToken(
+    const token = jwt.sign(
       {
         uid: user.id,
         email: user.email,
@@ -42,6 +51,10 @@ const login = async (req, res, next) => {
         expiresIn: 10,
       }
     );
+
+    if (!token) {
+      throw new BadRequestError("Gagal membuat token JWT");
+    }
 
     return res.status(200).json({
       token,

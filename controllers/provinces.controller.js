@@ -20,7 +20,6 @@ const getOne = async (req, res, next) => {
       where: {
         id: id,
       },
-      include: [cities],
     });
 
     if (!resultProvince) {
