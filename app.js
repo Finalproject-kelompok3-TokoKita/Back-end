@@ -3,6 +3,8 @@ const routers = require("./routes/index");
 const app = express();
 const PORT = process.env.APP_PORT || 3001;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(routers);
 
 app.get("/", (req, res, next) => {
