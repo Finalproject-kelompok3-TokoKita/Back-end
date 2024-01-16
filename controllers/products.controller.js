@@ -1,14 +1,14 @@
-const { categories, cities, users } = require("../models");
+const { categories, store, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {
   try {
-    const resultProducts = await users.findAll({
+    const resultProducts = await products.findAll({
       include: [provinces, cities],
     });
     return res.status(200).json({
       message: "Succesfully",
-      data: resultUsers,
+      data: resultProducts,
     });
   } catch (err) {
     next(err);
@@ -18,20 +18,20 @@ const getAll = async (req, res, next) => {
 const getOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const resultUsers = await users.findOne({
+    const resultProducts = await products.findOne({
       where: {
         id: id,
       },
-      include: [provinces, cities],
+      include: [categories, store],
     });
 
-    if (!resultUsers) {
-      throw new DataNotFoundError("User tidak ditemukan");
+    if (!resultProducts) {
+      throw new DataNotFoundError("Product tidak ditemukan");
     }
 
     return res.status(200).json({
       message: "Scucessfully",
-      data: resultUsers,
+      data: resultProducts,
     });
   } catch (err) {
     next(err);
@@ -40,54 +40,51 @@ const getOne = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
+    const { name, description, price, quantity, categoryId, storeId } = req.body;
 
-    if (!fullName || !email || !phone || !password || !dateOfBirth || !address || !cityId || !provinceId || !gender) {
+    if (!name || !description || !price || !quantity || !categoryId || !storeId) {
       throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     }
 
-    const province = await provinces.findOne({
+    const category = await categories.findOne({
       where: {
-        id: provinceId,
+        id: categoryId,
       },
     });
 
-    if (!province) {
-      throw new BadRequestError("Pastikan id provinsi valid");
+    if (!category) {
+      throw new BadRequestError("Pastikan id category valid");
     }
 
-    const city = await cities.findOne({
+    const Store = await store.findOne({
       where: {
-        id: cityId,
+        id: storeId,
       },
     });
 
-    if (!city) {
-      throw new BadRequestError("Pastikan id provinsi valid");
+    if (!Store) {
+      throw new BadRequestError("Pastikan id store valid");
     }
 
-    const userCreated = await users.create({
-      fullName,
-      email,
-      phone,
-      password,
-      dateOfBirth,
-      address,
-      cityId,
-      provinceId,
-      gender,
+    const productCreated = await products.create({
+      name,
+      description,
+      price,
+      quantity,
+      categoryId,
+      storeId,
     });
 
-    const user = await users.findOne({
+    const Products = await products.findOne({
       where: {
-        id: userCreated.id,
+        id: productCreated.id,
       },
-      include: [provinces, cities],
+      include: [categories, store],
     });
 
     return res.status(201).json({
       message: "Created",
-      data: user,
+      data: Products,
     });
   } catch (err) {
     next(err);
@@ -97,56 +94,53 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
+    const { name, description, price, quantity, categoryId, storeId } = req.body;
 
-    if (!fullName || !email || !phone || !cityId || !provinceId) {
+    if (!name || !description || !price || !quantity || !categoryId || !storeId) {
       throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     }
 
-    const resultUsers = await users.findOne({
+    const resultProducts = await products.findOne({
       where: {
         id: id,
       },
     });
 
-    if (!resultUsers) {
-      throw new DataNotFoundError("User tidak ditemukan");
+    if (!resultProducts) {
+      throw new DataNotFoundError("Product tidak ditemukan");
     }
 
-    const province = await provinces.findOne({
+    const category = await categories.findOne({
       where: {
-        id: provinceId,
+        id: categoryId,
       },
     });
 
-    if (!province) {
-      throw new BadRequestError("Pastikan id provinsi valid");
+    if (!category) {
+      throw new BadRequestError("Pastikan id category valid");
     }
 
-    const city = await cities.findOne({
+    const Store = await store.findOne({
       where: {
-        id: cityId,
+        id: storeId,
       },
     });
 
-    if (!city) {
+    if (!Store) {
       throw new BadRequestError("Pastikan id provinsi valid");
     }
 
-    resultUsers.fullName = fullName;
-    resultUsers.email = email;
-    resultUsers.phone = phone;
-    resultUsers.password = password;
-    resultUsers.dateOfBirth = dateOfBirth;
-    resultUsers.address = address;
-    resultUsers.cityId = cityId;
-    resultUsers.provinceId = provinceId;
-    resultUsers.gender = gender;
-    const resultUpdatedUsers = await resultUsers.save();
+    resultProducts.name = name;
+    resultProducts.description = description;
+    resultProducts.price = price;
+    resultProducts.quantity = quantity;
+    resultProducts.categoryId = categoryId;
+    resultProducts.storeId = storeId;
+    const resultUpdatedProducts = await resultProducts.save();
 
     return res.status(200).json({
       message: "Updated",
-      data: resultUpdatedUsers,
+      data: resultUpdatedProducts,
     });
   } catch (err) {
     next(err);
@@ -157,21 +151,21 @@ const deleteOne = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const resultUsers = await users.findOne({
+    const resultProducts = await products.findOne({
       where: {
         id: id,
       },
     });
 
-    if (!resultUsers) {
-      throw new DataNotFoundError("User tidak ditemukan");
+    if (!resultProducts) {
+      throw new DataNotFoundError("Product tidak ditemukan");
     }
 
-    await resultUsers.destroy();
+    await resultProducts.destroy();
 
     return res.status(200).json({
       message: "Updated",
-      data: resultUsers,
+      data: resultProducts,
     });
   } catch (err) {
     next(err);

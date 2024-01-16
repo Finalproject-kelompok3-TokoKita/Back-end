@@ -71,12 +71,12 @@ const updateOne = async (req, res, next) => {
       },
     });
 
-    if (!categories) {
-      throw new DataNotFoundError("Data provinsi yang anda inginkan tidak ditemukan!");
+    if (!Categories) {
+      throw new DataNotFoundError("Data Kategory yang anda inginkan tidak ditemukan!");
     }
 
     Categories.name = name;
-    const resultCategories = await categories.save();
+    const resultCategories = await Categories.save();
 
     return res.status(200).json({
       message: "Updated",

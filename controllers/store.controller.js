@@ -95,19 +95,19 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
+    const { phone, name, address, domain, cityId, provinceId } = req.body;
 
-    if (!fullName || !email || !phone || !cityId || !provinceId) {
+    if (!phone || !name || !address || !domain || !cityId || !provinceId) {
       throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     }
 
-    const resultUsers = await users.findOne({
+    const resultStore = await store.findOne({
       where: {
         id: id,
       },
     });
 
-    if (!resultUsers) {
+    if (!resultStore) {
       throw new DataNotFoundError("User tidak ditemukan");
     }
 
@@ -128,23 +128,21 @@ const updateOne = async (req, res, next) => {
     });
 
     if (!city) {
-      throw new BadRequestError("Pastikan id provinsi valid");
+      throw new BadRequestError("Pastikan id kota valid");
     }
 
-    resultUsers.fullName = fullName;
-    resultUsers.email = email;
-    resultUsers.phone = phone;
-    resultUsers.password = password;
-    resultUsers.dateOfBirth = dateOfBirth;
-    resultUsers.address = address;
-    resultUsers.cityId = cityId;
-    resultUsers.provinceId = provinceId;
-    resultUsers.gender = gender;
-    const resultUpdatedUsers = await resultUsers.save();
+    resultStore.userId = req.userId;
+    resultStore.phone = phone;
+    resultStore.name = name;
+    resultStore.address = address;
+    resultStore.domain = domain;
+    resultStore.cityId = cityId;
+    resultStore.provinceId = provinceId;
+    const resultUpdatedStore = await resultStore.save();
 
     return res.status(200).json({
       message: "Updated",
-      data: resultUpdatedUsers,
+      data: resultUpdatedStore,
     });
   } catch (err) {
     next(err);
@@ -155,21 +153,21 @@ const deleteOne = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const resultUsers = await users.findOne({
+    const resultStore = await store.findOne({
       where: {
         id: id,
       },
     });
 
-    if (!resultUsers) {
-      throw new DataNotFoundError("User tidak ditemukan");
+    if (!resultStore) {
+      throw new DataNotFoundError("Toko tidak ditemukan");
     }
 
-    await resultUsers.destroy();
+    await resultStore.destroy();
 
     return res.status(200).json({
       message: "Updated",
-      data: resultUsers,
+      data: resultStore,
     });
   } catch (err) {
     next(err);
