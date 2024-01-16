@@ -4,7 +4,7 @@ const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 const getAll = async (req, res, next) => {
   try {
     const resultProducts = await products.findAll({
-      include: [provinces, cities],
+      include: [categories, store],
     });
     return res.status(200).json({
       message: "Succesfully",
@@ -127,7 +127,7 @@ const updateOne = async (req, res, next) => {
     });
 
     if (!Store) {
-      throw new BadRequestError("Pastikan id provinsi valid");
+      throw new BadRequestError("Pastikan id store valid");
     }
 
     resultProducts.name = name;
@@ -164,7 +164,7 @@ const deleteOne = async (req, res, next) => {
     await resultProducts.destroy();
 
     return res.status(200).json({
-      message: "Updated",
+      message: "Deleted",
       data: resultProducts,
     });
   } catch (err) {

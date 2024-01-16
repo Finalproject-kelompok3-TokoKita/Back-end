@@ -101,14 +101,14 @@ const updateOne = async (req, res, next) => {
       throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     }
 
-    const resultStore = await store.findOne({
+    const city = await cities.findOne({
       where: {
-        id: id,
+        id: cityId,
       },
     });
 
-    if (!resultStore) {
-      throw new DataNotFoundError("User tidak ditemukan");
+    if (!city) {
+      throw new BadRequestError("Pastikan id kota valid");
     }
 
     const province = await provinces.findOne({
@@ -121,14 +121,14 @@ const updateOne = async (req, res, next) => {
       throw new BadRequestError("Pastikan id provinsi valid");
     }
 
-    const city = await cities.findOne({
+    const resultStore = await store.findOne({
       where: {
-        id: cityId,
+        id: id,
       },
     });
 
-    if (!city) {
-      throw new BadRequestError("Pastikan id kota valid");
+    if (!resultStore) {
+      throw new DataNotFoundError("Store tidak ditemukan");
     }
 
     resultStore.userId = req.userId;
@@ -166,7 +166,7 @@ const deleteOne = async (req, res, next) => {
     await resultStore.destroy();
 
     return res.status(200).json({
-      message: "Updated",
+      message: "Deleted",
       data: resultStore,
     });
   } catch (err) {
