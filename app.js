@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 const PORT = process.env.APP_PORT || 3001;
 
+app.use(express.static('public'))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({
@@ -11,7 +12,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-app.use(routers);
+app.use('/api', routers);
 
 app.get("/", (req, res, next) => {
   return res.status(200).json({
