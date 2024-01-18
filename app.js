@@ -1,10 +1,15 @@
 const express = require("express");
 const routers = require("./routes/index");
 const app = express();
+const cors = require("cors");
 const PORT = process.env.APP_PORT || 3001;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 app.use(routers);
 
 app.get("/", (req, res, next) => {
