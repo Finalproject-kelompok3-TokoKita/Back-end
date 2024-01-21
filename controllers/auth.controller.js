@@ -89,7 +89,7 @@ const register = async (req, res, next) => {
     }
 
     const isPhone = username.match(/^\d+$/g);
-    const existingUser = isPhone ? await users.findOne({ phone: username }) : await users.findOne({ email: username });
+    const existingUser = isPhone ? await users.findOne({ where: { phone: username } }) : await users.findOne({ where: { email: username } });
 
     if (existingUser) {
       throw new ConflictError("Nomor telepon atau email sudah terdaftar!");
