@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
-const { users } = require("../models");
+const { users, refreshtoken } = require("../models");
 const { PasswordUtilities, JWTUtilities } = require("../utils");
-const { BadRequestError } = require("../utils/errors");
+const { BadRequestError, DataNotFoundError } = require("../utils/errors");
 
 const login = async (req, res, next) => {
   try {
@@ -39,12 +39,41 @@ const login = async (req, res, next) => {
         email: user.email,
       },
       {
-        expiresIn: 10,
+        expiresIn: 60,
       }
     );
 
+    const refreshToken = JWTUtilities.generateRefreshToken(
+      {
+        uid: user.id,
+        email: user.email,
+      },
+      {
+        expiresIn: 60 * 60 * 24,
+      }
+    );
+
+    const refToken = await refreshtoken.findOne({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (!refToken) {
+      await refreshtoken.create({
+        userId: user.id,
+        token: refreshToken,
+      });
+    } else {
+      refToken.token = refreshToken;
+      await refToken.save();
+    }
+
+    res.cookie("", token);
     return res.status(200).json({
       token,
+      refreshToken,
+      message: "Log In success",
     });
   } catch (err) {
     next(err);
@@ -78,12 +107,85 @@ const register = async (req, res, next) => {
 
 const refreshToken = async (req, res, next) => {
   try {
-  } catch (err) {}
+    const refreshToken = req.headers["x-refresh-token"];
+
+    if (!refreshToken) {
+      throw new BadRequestError("Forbidden");
+    }
+
+    const getRefreshToken = await refreshtoken.findOne({
+      where: {
+        token: refreshToken,
+      },
+    });
+
+    console.log(getRefreshToken);
+    if (!getRefreshToken) {
+      throw new DataNotFoundError("Data Token tidak ditemukan");
+    }
+
+    const userRefreshToken = JWTUtilities.verifyRefreshToken(getRefreshToken.token);
+    if (!userRefreshToken) {
+      throw new BadRequestError("Forbidden");
+    }
+
+    const user = await users.findOne({
+      id: getRefreshToken.userId,
+    });
+
+    if (!user) {
+      throw new DataNotFoundError("User tidak ditemukan");
+    }
+
+    const token = JWTUtilities.generateToken(
+      {
+        uid: user.id,
+        email: user.email,
+      },
+      {
+        expiresIn: 60,
+      }
+    );
+
+    return res.status(200).json({
+      token,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 const logout = async (req, res, next) => {
   try {
-  } catch (err) {}
+    const refreshToken = req.headers["x-refresh-token"];
+
+    if (!refreshToken) {
+      throw new BadRequestError("Token is not provided!");
+    }
+
+    const verifyToken = JWTUtilities.verifyRefreshToken(refreshToken);
+    if (!verifyToken) {
+      return res.status(200).json({
+        message: "Successful",
+      });
+    }
+
+    const user = await users.findOne({
+      where: {
+        id: verifyToken.uid,
+      },
+    });
+
+    if (user) {
+      await user.destroy();
+    }
+
+    return res.status(200).json({
+      message: "Successful",
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = {
