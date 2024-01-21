@@ -85,12 +85,19 @@ const register = async (req, res, next) => {
     const { username, fullName, password } = req.body;
 
     if (!username || !fullName || !password) {
-      throw new BadRequestError("field tidak boleh kosong!");
+      throw new BadRequestError("Field tidak boleh kosong!");
     }
 
     const isPhone = username.match(/^\d+$/g);
+    const existingUser = isPhone ? await users.findOne({ phone: username }) : await users.findOne({ email: username });
+
+    if (existingUser) {
+      throw new ConflictError("Nomor telepon atau email sudah terdaftar!");
+    }
+
     const additionalObject = isPhone ? { phone: username } : { email: username };
     const hashedPassword = await PasswordUtilities.hash(password);
+
     await users.create({
       fullName: fullName,
       ...additionalObject,
