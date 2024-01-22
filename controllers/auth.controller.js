@@ -69,7 +69,7 @@ const login = async (req, res, next) => {
       await refToken.save();
     }
 
-    res.cookie('', token);
+    res.cookie('token', token);
     return res.status(200).json({
       token,
       refreshToken,
