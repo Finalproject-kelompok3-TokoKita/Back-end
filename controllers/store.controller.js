@@ -3,13 +3,17 @@ const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {
   try {
-    const resultStore = await store.findAll({
-      include: [provinces, cities],
-    });
-    return res.status(200).json({
-      message: "Succesfully",
-      data: resultStore,
-    });
+    const userId = req.user.id;
+    if (userId) {
+      const resultStore = await store.findAll({
+        where: { userId },
+        include: [provinces, cities],
+      });
+      return res.status(200).json({
+        message: "Succesfully",
+        data: resultStore,
+      });
+    }
   } catch (err) {
     next(err);
   }
@@ -18,21 +22,24 @@ const getAll = async (req, res, next) => {
 const getOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const resultStore = await store.findOne({
-      where: {
-        id: id,
-      },
-      include: [users, provinces, cities],
-    });
+    const userId = req.user.id;
+    if (userId) {
+      const resultStore = await store.findOne({
+        where: {
+          id: id,
+        },
+        include: [users, provinces, cities],
+      });
 
-    if (!resultStore) {
-      throw new DataNotFoundError("Toko tidak ditemukan");
+      if (!resultStore) {
+        throw new DataNotFoundError("Toko tidak ditemukan");
+      }
+
+      return res.status(200).json({
+        message: "Scucessfully",
+        data: resultStore,
+      });
     }
-
-    return res.status(200).json({
-      message: "Scucessfully",
-      data: resultStore,
-    });
   } catch (err) {
     next(err);
   }
@@ -42,32 +49,32 @@ const createOne = async (req, res, next) => {
   try {
     const { phone, name, address, domain, cityId, provinceId } = req.body;
 
-    if (!phone || !name || !address || !domain || !cityId || !provinceId) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    }
+    // if (!phone || !name || !address || !domain || !cityId || !provinceId) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
 
-    const province = await provinces.findOne({
-      where: {
-        id: provinceId,
-      },
-    });
+    // const province = await provinces.findOne({
+    //   where: {
+    //     id: provinceId,
+    //   },
+    // });
 
-    if (!province) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!province) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
-    const city = await cities.findOne({
-      where: {
-        id: cityId,
-      },
-    });
+    // const city = await cities.findOne({
+    //   where: {
+    //     id: cityId,
+    //   },
+    // });
 
-    if (!city) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!city) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
     const storeCreated = await store.create({
-      userId: req.userId,
+      userId: req.user.id,
       phone,
       name,
       address,
@@ -97,9 +104,9 @@ const updateOne = async (req, res, next) => {
     const { id } = req.params;
     const { phone, name, address, domain, cityId, provinceId } = req.body;
 
-    if (!phone || !name || !address || !domain || !cityId || !provinceId) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    }
+    // if (!phone || !name || !address || !domain || !cityId || !provinceId) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
 
     const city = await cities.findOne({
       where: {
@@ -131,7 +138,7 @@ const updateOne = async (req, res, next) => {
       throw new DataNotFoundError("Store tidak ditemukan");
     }
 
-    resultStore.userId = req.userId;
+    resultStore.userId = req.user.id;
     resultStore.phone = phone;
     resultStore.name = name;
     resultStore.address = address;

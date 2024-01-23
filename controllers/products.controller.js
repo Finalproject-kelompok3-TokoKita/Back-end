@@ -1,5 +1,6 @@
 const { categories, store, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
+const isUserOwnStore = require("../middlewares/authorization");
 
 const getAll = async (req, res, next) => {
   try {
@@ -41,9 +42,12 @@ const getOne = async (req, res, next) => {
 const createOne = async (req, res, next) => {
   try {
     const { name, description, price, quantity, categoryId, storeId } = req.body;
+    const userId = req.user.id;
 
-    if (!name || !description || !price || !quantity || !categoryId || !storeId) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    const isUserOwnsStore = await isUserOwnStore(userId, storeId);
+
+    if (!isUserOwnsStore) {
+      throw new BadRequestError("Anda tidak memiliki izin untuk membuat produk untuk toko ini");
     }
 
     const category = await categories.findOne({
@@ -53,7 +57,7 @@ const createOne = async (req, res, next) => {
     });
 
     if (!category) {
-      throw new BadRequestError("Pastikan id category valid");
+      throw new BadRequestError("ID kategori tidak valid");
     }
 
     const Store = await store.findOne({
@@ -63,7 +67,7 @@ const createOne = async (req, res, next) => {
     });
 
     if (!Store) {
-      throw new BadRequestError("Pastikan id store valid");
+      throw new BadRequestError("ID toko tidak valid");
     }
 
     const productCreated = await products.create({
@@ -83,7 +87,7 @@ const createOne = async (req, res, next) => {
     });
 
     return res.status(201).json({
-      message: "Created",
+      message: "Berhasil Dibuat",
       data: Products,
     });
   } catch (err) {

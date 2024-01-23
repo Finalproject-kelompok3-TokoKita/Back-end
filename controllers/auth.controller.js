@@ -39,7 +39,7 @@ const login = async (req, res, next) => {
         email: user.email,
       },
       {
-        expiresIn: 60,
+        expiresIn: 60 * 60 * 24,
       }
     );
 

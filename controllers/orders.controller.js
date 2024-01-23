@@ -42,9 +42,9 @@ const createOne = async (req, res, next) => {
   try {
     const { payment, status, json } = req.body;
 
-    if (!payment || !status || !json) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    }
+    // if (!payment || !status || !json) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
 
     const ordersCreated = await orders.create({
       userId: req.userId,
@@ -128,10 +128,55 @@ const deleteOne = async (req, res, next) => {
   }
 };
 
+const bayarPembeli = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const Order = await orders.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!Order) {
+      throw new DataNotFoundError("Store tidak ditemukan");
+    }
+
+    Order.status = "menunggu konfirmasi";
+    await Order.save();
+    res.status(200).json({ message: "Pembayaran berhasil. Order telah diproses." });
+  } catch (error) {
+    console.error("Error in bayar ordere:", error);
+    res.status(500).json({ error: "Terjadi kesalahan server" });
+  }
+};
+
+const konfirmasiPenjual = async (req, res) => {
+  try {
+    const Order = req.orders;
+    if (!Order) {
+      return res.status(404).json({ message: "order tidak ditemukan" });
+    }
+    if (Order.status !== "menunggu konfirmasi") {
+      return res.status(400).json({
+        message: "Order tidak dapat dikonfirmasi",
+      });
+    }
+
+    Order.status = "dikonfirmasi";
+    await Order.save();
+    res.status(200).json({ message: "Pembayaran berhasil. Order telah diproses." });
+  } catch (error) {
+    console.error("Error in konfirmasi:", error);
+    res.status(500).json({ error: "Terjadi kesalahan server" });
+  }
+};
+
 module.exports = {
   getAll,
   getOne,
   createOne,
   updateOne,
   deleteOne,
+  bayarPembeli,
+  konfirmasiPenjual,
 };

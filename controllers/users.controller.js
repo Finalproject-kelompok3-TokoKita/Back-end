@@ -18,21 +18,26 @@ const getAll = async (req, res, next) => {
 
 const getOne = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const resultUsers = await users.findOne({
+    const decodedToken = req.user;
+    if (!decodedToken || !decodedToken.id) {
+      throw new DataNotFoundError("Token tidak valid");
+    }
+
+    const userId = decodedToken.id;
+
+    const resultUser = await users.findOne({
       where: {
-        id: id,
+        id: userId,
       },
-      include: [provinces, cities],
     });
 
-    if (!resultUsers) {
+    if (!resultUser) {
       throw new DataNotFoundError("User tidak ditemukan");
     }
 
     return res.status(200).json({
-      message: "Scucessfully",
-      data: resultUsers,
+      message: "Berhasil",
+      data: resultUser,
     });
   } catch (err) {
     next(err);
