@@ -92,7 +92,7 @@ const register = async (req, res, next) => {
     const existingUser = isPhone ? await users.findOne({ where: { phone: username } }) : await users.findOne({ where: { email: username } });
 
     if (existingUser) {
-      throw new ConflictError("Nomor telepon atau email sudah terdaftar!");
+      throw new BadRequestError("Nomor telepon atau email sudah terdaftar!");
     }
 
     const additionalObject = isPhone ? { phone: username } : { email: username };

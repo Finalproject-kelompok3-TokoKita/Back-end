@@ -42,6 +42,11 @@ const getOne = async (req, res, next) => {
 const createOne = async (req, res, next) => {
   try {
     const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
+    const file = req.file;
+
+    if (!fullName || !email || !phone || !password || !dateOfBirth || !address || !cityId || !provinceId || !gender) {
+      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    }
 
     const province = await provinces.findOne({
       where: {
@@ -60,41 +65,32 @@ const createOne = async (req, res, next) => {
     });
 
     if (!city) {
-      throw new BadRequestError("Pastikan id kota valid");
+      throw new BadRequestError("Pastikan id provinsi valid");
     }
 
-    const folderName = "users";
-    const userMulter = configureMulter(folderName);
+    const userCreated = await users.create({
+      fullName,
+      email,
+      phone,
+      password,
+      dateOfBirth,
+      address,
+      cityId,
+      provinceId,
+      gender,
+      photo: file ? file.storedFilename : null,
+    });
 
-    userMulter.single("file")(req, res, async (err) => {
-      if (err) {
-        return next(new BadRequestError(err.message));
-      }
+    const user = await users.findOne({
+      where: {
+        id: userCreated.id,
+      },
+      include: [provinces, cities],
+    });
 
-      const userCreated = await users.create({
-        fullName,
-        email,
-        phone,
-        password,
-        dateOfBirth,
-        address,
-        cityId,
-        provinceId,
-        gender,
-        photo: req.file ? req.file.storedFilename : null,
-      });
-
-      const user = await users.findOne({
-        where: {
-          id: userCreated.id,
-        },
-        include: [provinces, cities],
-      });
-
-      return res.status(201).json({
-        message: "Created",
-        data: user,
-      });
+    return res.status(201).json({
+      message: "Created",
+      data: user,
     });
   } catch (err) {
     next(err);
@@ -138,38 +134,28 @@ const updateOne = async (req, res, next) => {
     });
 
     if (!city) {
-      throw new BadRequestError("Pastikan id kota valid");
+      throw new BadRequestError("Pastikan id provinsi valid");
     }
 
-    const folderName = "users";
-    const userMulter = configureMulter(folderName);
+    if (file && resultUsers.photo) {
+      removePhoto("users", resultUsers.photo);
+    }
 
-    userMulter.single("file")(req, res, async (err) => {
-      if (err) {
-        return next(new BadRequestError(err.message));
-      }
+    resultUsers.fullName = fullName;
+    resultUsers.email = email;
+    resultUsers.phone = phone;
+    resultUsers.password = password;
+    resultUsers.dateOfBirth = dateOfBirth;
+    resultUsers.address = address;
+    resultUsers.cityId = cityId;
+    resultUsers.provinceId = provinceId;
+    resultUsers.gender = gender;
+    resultUsers.photo = file ? file.storedFilename : resultUsers.photo;
+    const resultUpdatedUsers = await resultUsers.save();
 
-      if (file && resultUsers.photo) {
-        removePhoto(folderName, resultUsers.photo);
-      }
-
-      resultUsers.fullName = fullName;
-      resultUsers.email = email;
-      resultUsers.phone = phone;
-      resultUsers.password = password;
-      resultUsers.dateOfBirth = dateOfBirth;
-      resultUsers.address = address;
-      resultUsers.cityId = cityId;
-      resultUsers.provinceId = provinceId;
-      resultUsers.gender = gender;
-      resultUsers.photo = file ? req.file.storedFilename : resultUsers.photo;
-
-      const resultUpdatedUsers = await resultUsers.save();
-
-      return res.status(200).json({
-        message: "Updated",
-        data: resultUpdatedUsers,
-      });
+    return res.status(200).json({
+      message: "Updated",
+      data: resultUpdatedUsers,
     });
   } catch (err) {
     next(err);
