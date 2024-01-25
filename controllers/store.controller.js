@@ -1,45 +1,76 @@
 const { provinces, cities, users, store } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
+// const getAll = async (req, res, next) => {
+//   try {
+//     const userId = req.user.id;
+//     if (userId) {
+//       const resultStore = await store.findAll({
+//         where: { userId },
+//         include: [provinces, cities],
+//       });
+//       return res.status(200).json({
+//         message: "Succesfully",
+//         data: resultStore,
+//       });
+//     }
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 const getAll = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-    if (userId) {
-      const resultStore = await store.findAll({
-        where: { userId },
-        include: [provinces, cities],
-      });
-      return res.status(200).json({
-        message: "Succesfully",
-        data: resultStore,
-      });
-    }
+    const resultStore = await store.findAll();
+    return res.status(200).json({
+      message: "Succesfully",
+      data: resultStore,
+    });
   } catch (err) {
     next(err);
   }
 };
 
+// const getOne = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const userId = req.user.id;
+//     if (userId) {
+//       const resultStore = await store.findOne({
+//         where: {
+//           id: id,
+//         },
+//         include: [users, provinces, cities],
+//       });
+
+//       if (!resultStore) {
+//         throw new DataNotFoundError("Toko tidak ditemukan");
+//       }
+
+//       return res.status(200).json({
+//         message: "Scucessfully",
+//         data: resultStore,
+//       });
+//     }
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 const getOne = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    if (userId) {
-      const resultStore = await store.findOne({
-        where: {
-          id: id,
-        },
-        include: [users, provinces, cities],
-      });
+    const id = req.params.id;
+    const resultStore = await store.findOne({
+      where: {
+        id: id,
+      },
+      include: [users, provinces, cities],
+    });
 
-      if (!resultStore) {
-        throw new DataNotFoundError("Toko tidak ditemukan");
-      }
-
-      return res.status(200).json({
-        message: "Scucessfully",
-        data: resultStore,
-      });
-    }
+    return res.status(200).json({
+      message: "Scucessfully",
+      data: resultStore,
+    });
   } catch (err) {
     next(err);
   }

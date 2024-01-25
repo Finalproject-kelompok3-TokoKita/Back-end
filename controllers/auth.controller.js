@@ -70,6 +70,7 @@ const login = async (req, res, next) => {
     }
 
     res.cookie("token", token);
+    res.cookie("refreshToken", refreshToken);
     return res.status(200).json({
       token,
       refreshToken,

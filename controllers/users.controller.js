@@ -44,6 +44,29 @@ const getOne = async (req, res, next) => {
   }
 };
 
+const getByID = async (req, res, next) => {
+  try {
+      const { id } = req.params;
+      const resultUsers = await users.findOne({
+          where: {
+              id: id,
+          },
+          include: [provinces, cities]
+      });
+
+      if (!resultUsers) {
+          throw new DataNotFoundError('User tidak ditemukan')
+      } 
+
+      return res.status(200).json({
+          message: 'Scucessfully',
+          data: resultUsers,
+      })
+  } catch (err) {
+      next(err)
+  }
+}
+
 const createOne = async (req, res, next) => {
   try {
     const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
@@ -105,10 +128,15 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
+    //const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
+    const { fullName, dateOfBirth, gender, email, phone, address, cityId, provinceId } = req.body;
     const file = req.file;
 
-    if (!fullName || !email || !phone || !cityId || !provinceId) {
+    // if (!fullName || !email || !phone || !cityId || !provinceId) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
+
+    if (!fullName || !email || !phone) {
       throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     }
 
@@ -122,39 +150,39 @@ const updateOne = async (req, res, next) => {
       throw new DataNotFoundError("User tidak ditemukan");
     }
 
-    const province = await provinces.findOne({
-      where: {
-        id: provinceId,
-      },
-    });
+    // const province = await provinces.findOne({
+    //   where: {
+    //     id: provinceId,
+    //   },
+    // });
 
-    if (!province) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!province) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
-    const city = await cities.findOne({
-      where: {
-        id: cityId,
-      },
-    });
+    // const city = await cities.findOne({
+    //   where: {
+    //     id: cityId,
+    //   },
+    // });
 
-    if (!city) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!city) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
     if (file && resultUsers.photo) {
       removePhoto("users", resultUsers.photo);
     }
 
     resultUsers.fullName = fullName;
+    resultUsers.dateOfBirth = dateOfBirth;
+    resultUsers.gender = gender;
     resultUsers.email = email;
     resultUsers.phone = phone;
-    resultUsers.password = password;
-    resultUsers.dateOfBirth = dateOfBirth;
-    resultUsers.address = address;
-    resultUsers.cityId = cityId;
-    resultUsers.provinceId = provinceId;
-    resultUsers.gender = gender;
+    //resultUsers.password = password;
+    //resultUsers.address = address;
+    //resultUsers.cityId = cityId;
+    //resultUsers.provinceId = provinceId;
     resultUsers.photo = file ? file.storedFilename : resultUsers.photo;
     const resultUpdatedUsers = await resultUsers.save();
 
@@ -210,6 +238,7 @@ const uploadFile = async (req, res, next) => {
 module.exports = {
   getAll,
   getOne,
+  getByID,
   createOne,
   updateOne,
   deleteOne,
