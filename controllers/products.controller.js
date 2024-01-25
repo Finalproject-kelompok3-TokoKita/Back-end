@@ -41,13 +41,24 @@ const getOne = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    const { name, description, price, quantity, categoryId, storeId } = req.body;
+    const { name, description, price, quantity, categoryId } =
+      req.body;
     const userId = req.user.id;
 
-    const isUserOwnsStore = await isUserOwnStore(userId, storeId);
+    // const isUserOwnsStore = await isUserOwnStore(userId, storeId);
 
-    if (!isUserOwnsStore) {
-      throw new BadRequestError("Anda tidak memiliki izin untuk membuat produk untuk toko ini");
+    // if (!isUserOwnsStore) {
+    //   throw new BadRequestError("Anda tidak memiliki izin untuk membuat produk untuk toko ini");
+    // }
+
+    const userStore = await store.findOne({
+      where: {
+        userId,
+      },
+    });
+
+    if (!userStore) {
+      throw new BadRequestError("Kamu tidak memiliki toko!");
     }
 
     const category = await categories.findOne({
@@ -60,23 +71,13 @@ const createOne = async (req, res, next) => {
       throw new BadRequestError("ID kategori tidak valid");
     }
 
-    const Store = await store.findOne({
-      where: {
-        id: storeId,
-      },
-    });
-
-    if (!Store) {
-      throw new BadRequestError("ID toko tidak valid");
-    }
-
     const productCreated = await products.create({
       name,
       description,
       price,
       quantity,
       categoryId,
-      storeId,
+      storeId: userStore.id,
     });
 
     const Products = await products.findOne({
@@ -98,9 +99,17 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, description, price, quantity, categoryId, storeId } = req.body;
+    const { name, description, price, quantity, categoryId, storeId } =
+      req.body;
 
-    if (!name || !description || !price || !quantity || !categoryId || !storeId) {
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !quantity ||
+      !categoryId ||
+      !storeId
+    ) {
       throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     }
 

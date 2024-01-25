@@ -2,12 +2,13 @@ const { Router } = require("express");
 const router = Router();
 
 const { OrdersController } = require("../controllers");
+const authMiddleware = require("../middlewares/auth.middleware");
 
 router.get("/orders", OrdersController.getAll);
 router.get("/orders/:id(\\d+)", OrdersController.getOne);
-router.post("/orders", OrdersController.createOne);
+router.post("/orders", authMiddleware, OrdersController.createOne);
 router.put("/orders/:id(\\d+)", OrdersController.updateOne);
 router.delete("/orders/:id(\\d+)", OrdersController.deleteOne);
-router.put("/bayar/:id(\\d+)", OrdersController.bayarPembeli);
+router.put("/bayar/:id(\\d+)", authMiddleware, OrdersController.bayarPembeli);
 router.put("/konfirmasi/:id(\\d+)", OrdersController.konfirmasiPenjual);
 module.exports = router;
