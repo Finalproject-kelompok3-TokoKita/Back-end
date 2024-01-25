@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       store.belongsTo(models.provinces);
       store.belongsTo(models.cities);
       store.belongsTo(models.users);
+      store.belongsTo(models.categories);
       store.hasMany(models.products);
     }
   }
@@ -25,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       domain: DataTypes.STRING,
       cityId: DataTypes.NUMBER,
       provinceId: DataTypes.NUMBER,
+      categoryId: DataTypes.NUMBER,
     },
     {
       sequelize,

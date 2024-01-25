@@ -46,35 +46,35 @@ const getOne = async (req, res, next) => {
 
 const getByID = async (req, res, next) => {
   try {
-      const { id } = req.params;
-      const resultUsers = await users.findOne({
-          where: {
-              id: id,
-          },
-          include: [provinces, cities]
-      });
+    const { id } = req.params;
+    const resultUsers = await users.findOne({
+      where: {
+        id: id,
+      },
+      include: [provinces, cities],
+    });
 
-      if (!resultUsers) {
-          throw new DataNotFoundError('User tidak ditemukan')
-      } 
+    if (!resultUsers) {
+      throw new DataNotFoundError("User tidak ditemukan");
+    }
 
-      return res.status(200).json({
-          message: 'Scucessfully',
-          data: resultUsers,
-      })
+    return res.status(200).json({
+      message: "Scucessfully",
+      data: resultUsers,
+    });
   } catch (err) {
-      next(err)
+    next(err);
   }
-}
+};
 
 const createOne = async (req, res, next) => {
   try {
     const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
     const file = req.file;
 
-    if (!fullName || !email || !phone || !password || !dateOfBirth || !address || !cityId || !provinceId || !gender) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    }
+    // if (!fullName || !email || !phone || !password || !dateOfBirth || !address || !cityId || !provinceId || !gender) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
 
     const province = await provinces.findOne({
       where: {
@@ -179,10 +179,10 @@ const updateOne = async (req, res, next) => {
     resultUsers.gender = gender;
     resultUsers.email = email;
     resultUsers.phone = phone;
-    //resultUsers.password = password;
-    //resultUsers.address = address;
-    //resultUsers.cityId = cityId;
-    //resultUsers.provinceId = provinceId;
+    // resultUsers.password = password;
+    resultUsers.address = address;
+    resultUsers.cityId = cityId;
+    resultUsers.provinceId = provinceId;
     resultUsers.photo = file ? file.storedFilename : resultUsers.photo;
     const resultUpdatedUsers = await resultUsers.save();
 
@@ -216,7 +216,7 @@ const deleteOne = async (req, res, next) => {
     await resultUsers.destroy();
 
     return res.status(200).json({
-      message: "Updated",
+      message: "Deleted",
       data: resultUsers,
     });
   } catch (err) {
