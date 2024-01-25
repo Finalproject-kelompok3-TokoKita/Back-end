@@ -1,3 +1,3 @@
 module.exports = {
-  upload: require("./uploader.middleware"),
+  uploader: require("./uploader.middleware"),
 };
