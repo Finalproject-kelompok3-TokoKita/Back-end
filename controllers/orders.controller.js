@@ -1,4 +1,4 @@
-const { orders, users } = require("../models");
+const { orders, users, order_items, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {
@@ -40,24 +40,54 @@ const getOne = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    const { payment, status, json } = req.body;
+    const { orderProducts } = req.body;
 
-    // if (!payment || !status || !json) {
-    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    // }
+    // products dari body bentuknya array
+
+    if (
+      !orderProducts ||
+      !Array.isArray(orderProducts) ||
+      !orderProducts.length
+    ) {
+      throw new BadRequestError(
+        "Request yang dikirimkan tidak sesuai dengan yang di izinkan!"
+      );
+    }
+
+    for (const product of orderProducts) {
+      const item = await products.findOne({
+        where: {
+          id: product.id,
+        },
+      });
+
+      if (!item) {
+        throw new BadRequestError("Product yang dimaksud tidak ada");
+      }
+
+      if (item.quantity < product.qty) {
+        throw new BadRequestError("Stok habis");
+      }
+    }
 
     const ordersCreated = await orders.create({
-      userId: req.userId,
-      payment,
-      status,
-      json,
+      userId: req.user.id,
+      status: "PENDING",
     });
+
+    for (const product of orderProducts) {
+      await order_items.create({
+        orderId: ordersCreated.id,
+        productId: product.id,
+        quantity: product.qty,
+      });
+    }
 
     const Order = await orders.findOne({
       where: {
         id: ordersCreated.id,
       },
-      include: [users],
+      include: [users, order_items],
     });
 
     return res.status(201).json({
@@ -135,15 +165,30 @@ const bayarPembeli = async (req, res) => {
       where: {
         id: id,
       },
+      include: [order_items],
     });
 
     if (!Order) {
       throw new DataNotFoundError("Store tidak ditemukan");
     }
 
+    // ngambil data order item
+    for (const item of Order.order_items) {
+      const product = await products.findOne({
+        where: {
+          id: item.productId,
+        },
+      });
+
+      product.quantity = product.quantity - item.quantity;
+      await product.save();
+    }
+
     Order.status = "menunggu konfirmasi";
     await Order.save();
-    res.status(200).json({ message: "Pembayaran berhasil. Order telah diproses." });
+    res
+      .status(200)
+      .json({ message: "Pembayaran berhasil. Order telah diproses." });
   } catch (error) {
     console.error("Error in bayar ordere:", error);
     res.status(500).json({ error: "Terjadi kesalahan server" });
@@ -164,7 +209,9 @@ const konfirmasiPenjual = async (req, res) => {
 
     Order.status = "dikonfirmasi";
     await Order.save();
-    res.status(200).json({ message: "Pembayaran berhasil. Order telah diproses." });
+    res
+      .status(200)
+      .json({ message: "Pembayaran berhasil. Order telah diproses." });
   } catch (error) {
     console.error("Error in konfirmasi:", error);
     res.status(500).json({ error: "Terjadi kesalahan server" });

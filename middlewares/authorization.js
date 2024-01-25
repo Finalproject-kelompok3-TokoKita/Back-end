@@ -5,7 +5,6 @@ const isUserOwnStore = async (userId, storeId) => {
   try {
     const Store = await store.findOne({
       where: {
-        id: storeId,
         userId: userId,
       },
     });
