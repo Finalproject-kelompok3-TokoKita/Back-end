@@ -5,7 +5,7 @@ const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 const getAll = async (req, res, next) => {
   try {
     const resultUsers = await users.findAll({
-      include: [provinces, cities],
+      include: [store, provinces, cities],
     });
     return res.status(200).json({
       message: "Succesfully",

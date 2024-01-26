@@ -1,36 +1,6 @@
 const { provinces, cities, users, store, categories } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
-// const getAl = async (req, res, next) => {
-//   try {
-//     const userId = req.user.id;
-//     if (userId) {
-//       const resultStore = await store.findAll({
-//         where: { userId },
-//         include: [provinces, cities],
-//       });
-//       return res.status(200).json({
-//         message: "Succesfully",
-//         data: resultStore,
-//       });
-//     }
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-const getAll = async (req, res, next) => {
-  try {
-    const resultStore = await store.findAll();
-    return res.status(200).json({
-      message: "Succesfully",
-      data: resultStore,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
 const dashboard = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -49,9 +19,22 @@ const dashboard = async (req, res, next) => {
   }
 };
 
+const getAll = async (req, res, next) => {
+  try {
+    const resultStore = await store.findAll();
+    return res.status(200).json({
+      message: "Succesfully",
+      data: resultStore,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getOne = async (req, res, next) => {
   try {
     const id = req.params.id;
+    
     const resultStore = await store.findOne({
       where: {
         id: id,
@@ -67,6 +50,8 @@ const getOne = async (req, res, next) => {
     next(err);
   }
 };
+
+
 
 const createOne = async (req, res, next) => {
   try {

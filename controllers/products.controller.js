@@ -1,13 +1,55 @@
 const { store, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
+// const getAll = async (req, res, next) => {
+//   try {
+//     const storeId = req.store.id;
+//     if (storeId) {
+//       const resultProducts = await products.findAll({
+//         where: { storeId },
+//         include: [store],
+//       });
+//       return res.status(200).json({
+//         message: "Succesfully",
+//         data: resultProducts,
+//       });
+//     }
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 const getAll = async (req, res, next) => {
   try {
+    const id = req.user;
     const resultProducts = await products.findAll({
       include: [store],
     });
     return res.status(200).json({
       message: "Succesfully",
+      data: id,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getOneDashboard = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const resultProducts = await products.findOne({
+      where: {
+        id: id,
+      },
+      include: [store],
+    });
+
+    if (!resultProducts) {
+      throw new DataNotFoundError("Product tidak ditemukan");
+    }
+
+    return res.status(200).json({
+      message: "Scucessfully",
       data: resultProducts,
     });
   } catch (err) {
@@ -31,7 +73,7 @@ const getOne = async (req, res, next) => {
 
     return res.status(200).json({
       message: "Scucessfully",
-      data: resultProducts,
+      data: id,
     });
   } catch (err) {
     next(err);
@@ -149,6 +191,7 @@ const deleteOne = async (req, res, next) => {
 
 module.exports = {
   getAll,
+  getOneDashboard,
   getOne,
   createOne,
   updateOne,
