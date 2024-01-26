@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       store.belongsTo(models.users);
       store.belongsTo(models.categories);
       store.hasMany(models.products);
+      store.hasMany(models.favorite);
     }
   }
   store.init(
