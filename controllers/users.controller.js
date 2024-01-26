@@ -5,7 +5,7 @@ const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 const getAll = async (req, res, next) => {
   try {
     const resultUsers = await users.findAll({
-      include: [provinces, cities],
+      include: [store, provinces, cities],
     });
     return res.status(200).json({
       message: "Succesfully",
@@ -181,8 +181,8 @@ const updateOne = async (req, res, next) => {
     resultUsers.phone = phone;
     // resultUsers.password = password;
     resultUsers.address = address;
-    resultUsers.cityId = cityId;
-    resultUsers.provinceId = provinceId;
+    //resultUsers.cityId = cityId;
+    //resultUsers.provinceId = provinceId;
     resultUsers.photo = file ? file.storedFilename : resultUsers.photo;
     const resultUpdatedUsers = await resultUsers.save();
 
