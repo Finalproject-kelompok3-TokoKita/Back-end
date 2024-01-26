@@ -9,4 +9,5 @@ module.exports = {
   OrdersController: require("./orders.controller"),
   Order_ItemController: require("./order_items.controller"),
   FavoriteController: require("./favorite.controller"),
+  CartController: require("./cart.controller"),
 };

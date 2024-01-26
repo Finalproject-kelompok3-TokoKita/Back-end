@@ -10,5 +10,4 @@ router.post("/orders", authMiddleware, OrdersController.createOne);
 router.put("/orders/:id(\\d+)", OrdersController.updateOne);
 router.delete("/orders/:id(\\d+)", OrdersController.deleteOne);
 router.put("/bayar/:id(\\d+)", authMiddleware, OrdersController.bayarPembeli);
-router.put("/konfirmasi/:id(\\d+)", OrdersController.konfirmasiPenjual);
 module.exports = router;

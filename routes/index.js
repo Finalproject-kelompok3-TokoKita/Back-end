@@ -12,6 +12,7 @@ const routes = [
   require("./orders.routes"),
   require("./order_items.routes"),
   require("./favorite.routes"),
+  require("./cart.routes"),
 ];
 
 routes.forEach((route) => router.use(route));

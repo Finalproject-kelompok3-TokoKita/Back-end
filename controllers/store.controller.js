@@ -1,4 +1,4 @@
-const { provinces, cities, users, store, categories } = require("../models");
+const { provinces, cities, users, store, categories, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const dashboard = async (req, res, next) => {
@@ -7,7 +7,7 @@ const dashboard = async (req, res, next) => {
     if (userId) {
       const resultStore = await store.findAll({
         where: { userId },
-        include: [provinces, cities],
+        include: [provinces, cities, products],
       });
       return res.status(200).json({
         message: "Succesfully",
@@ -34,7 +34,7 @@ const getAll = async (req, res, next) => {
 const getOne = async (req, res, next) => {
   try {
     const id = req.params.id;
-    
+
     const resultStore = await store.findOne({
       where: {
         id: id,
@@ -50,8 +50,6 @@ const getOne = async (req, res, next) => {
     next(err);
   }
 };
-
-
 
 const createOne = async (req, res, next) => {
   try {

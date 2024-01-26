@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       users.hasOne(models.store);
       users.hasMany(models.orders);
       users.hasMany(models.favorite);
+      users.hasMany(models.cart);
     }
   }
   users.init(

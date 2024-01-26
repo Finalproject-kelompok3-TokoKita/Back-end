@@ -1,4 +1,4 @@
-const { orders, users, order_items, products } = require("../models");
+const { orders, users, order_items, products, cart } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {
@@ -40,24 +40,33 @@ const getOne = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    const { orderProducts } = req.body;
+    // const { orderProducts } = req.body;
 
-    // products dari body bentuknya array
+    // // products dari body bentuknya array
 
-    if (
-      !orderProducts ||
-      !Array.isArray(orderProducts) ||
-      !orderProducts.length
-    ) {
-      throw new BadRequestError(
-        "Request yang dikirimkan tidak sesuai dengan yang di izinkan!"
-      );
+    // if (
+    //   !orderProducts ||
+    //   !Array.isArray(orderProducts) ||
+    //   !orderProducts.length
+    // ) {
+    //   throw new BadRequestError(
+    //     "Request yang dikirimkan tidak sesuai dengan yang di izinkan!"
+    //   );
+    // }
+    const orderProducts = await cart.findAll({
+      where: {
+        userId: req.user.id,
+      },
+    });
+
+    if (!orderProducts.length) {
+      throw new BadRequestError("tidak ada isi cart");
     }
 
     for (const product of orderProducts) {
       const item = await products.findOne({
         where: {
-          id: product.id,
+          id: product.productId,
         },
       });
 
@@ -65,7 +74,7 @@ const createOne = async (req, res, next) => {
         throw new BadRequestError("Product yang dimaksud tidak ada");
       }
 
-      if (item.quantity < product.qty) {
+      if (item.quantity < product.quantity) {
         throw new BadRequestError("Stok habis");
       }
     }
@@ -78,8 +87,14 @@ const createOne = async (req, res, next) => {
     for (const product of orderProducts) {
       await order_items.create({
         orderId: ordersCreated.id,
-        productId: product.id,
-        quantity: product.qty,
+        productId: product.productId,
+        quantity: product.quantity,
+      });
+      await cart.destroy({
+        where: {
+          userId: req.user.id,
+          productId: product.productId,
+        },
       });
     }
 
@@ -164,6 +179,7 @@ const bayarPembeli = async (req, res) => {
     const Order = await orders.findOne({
       where: {
         id: id,
+        userId: req.user.id,
       },
       include: [order_items],
     });
@@ -184,37 +200,12 @@ const bayarPembeli = async (req, res) => {
       await product.save();
     }
 
-    Order.status = "menunggu konfirmasi";
+    Order.status = "PAID";
     await Order.save();
-    res
-      .status(200)
-      .json({ message: "Pembayaran berhasil. Order telah diproses." });
+    res.status(200).json({ message: "Pembayaran berhasil. Order telah diproses." });
   } catch (error) {
     console.error("Error in bayar ordere:", error);
-    res.status(500).json({ error: "Terjadi kesalahan server" });
-  }
-};
-
-const konfirmasiPenjual = async (req, res) => {
-  try {
-    const Order = req.orders;
-    if (!Order) {
-      return res.status(404).json({ message: "order tidak ditemukan" });
-    }
-    if (Order.status !== "menunggu konfirmasi") {
-      return res.status(400).json({
-        message: "Order tidak dapat dikonfirmasi",
-      });
-    }
-
-    Order.status = "dikonfirmasi";
-    await Order.save();
-    res
-      .status(200)
-      .json({ message: "Pembayaran berhasil. Order telah diproses." });
-  } catch (error) {
-    console.error("Error in konfirmasi:", error);
-    res.status(500).json({ error: "Terjadi kesalahan server" });
+    next(error);
   }
 };
 
@@ -225,5 +216,4 @@ module.exports = {
   updateOne,
   deleteOne,
   bayarPembeli,
-  konfirmasiPenjual,
 };

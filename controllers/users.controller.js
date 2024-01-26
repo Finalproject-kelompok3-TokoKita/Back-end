@@ -191,6 +191,7 @@ const updateOne = async (req, res, next) => {
       data: resultUpdatedUsers,
     });
   } catch (err) {
+    removePhoto("users", req.file.storedFilename);
     next(err);
   }
 };

@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       products.belongsTo(models.categories);
       products.belongsTo(models.store);
       products.hasMany(models.order_items);
+      products.hasMany(models.cart);
     }
   }
   products.init(
