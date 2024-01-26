@@ -181,8 +181,8 @@ const updateOne = async (req, res, next) => {
     resultUsers.phone = phone;
     // resultUsers.password = password;
     resultUsers.address = address;
-    resultUsers.cityId = cityId;
-    resultUsers.provinceId = provinceId;
+    //resultUsers.cityId = cityId;
+    //resultUsers.provinceId = provinceId;
     resultUsers.photo = file ? file.storedFilename : resultUsers.photo;
     const resultUpdatedUsers = await resultUsers.save();
 
