@@ -1,7 +1,7 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 module.exports = (sequelize, DataTypes) => {
   class users extends Model {
     /**
@@ -13,22 +13,29 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       users.belongsTo(models.provinces);
       users.belongsTo(models.cities);
+      users.hasOne(models.store);
+      users.hasMany(models.orders);
+      users.hasMany(models.favorite);
+      users.hasMany(models.cart);
     }
   }
-  users.init({
-    fullName: DataTypes.STRING,
-    email: DataTypes.STRING,
-    phone: DataTypes.STRING,
-    password: DataTypes.STRING,
-    dateOfBirth: DataTypes.DATE,
-    address: DataTypes.STRING,
-    cityId: DataTypes.NUMBER,
-    provinceId: DataTypes.NUMBER,
-    gender: DataTypes.STRING,
-    photo: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'users',
-  });
+  users.init(
+    {
+      fullName: DataTypes.STRING,
+      email: DataTypes.STRING,
+      phone: DataTypes.STRING,
+      password: DataTypes.STRING,
+      dateOfBirth: DataTypes.DATE,
+      address: DataTypes.STRING,
+      cityId: DataTypes.NUMBER,
+      provinceId: DataTypes.NUMBER,
+      gender: DataTypes.STRING,
+      photo: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "users",
+    }
+  );
   return users;
 };

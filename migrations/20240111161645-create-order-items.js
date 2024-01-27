@@ -2,24 +2,33 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("cities", {
+    await queryInterface.createTable("order_items", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      provinceId: {
+      orderId: {
         type: Sequelize.INTEGER,
         references: {
           key: "id",
-          model: "provinces",
+          model: "orders",
         },
         onUpdate: "cascade",
         onDelete: "cascade",
       },
-      name: {
-        type: Sequelize.STRING,
+      productId: {
+        type: Sequelize.INTEGER,
+        references: {
+          key: "id",
+          model: "products",
+        },
+        onUpdate: "cascade",
+        onDelete: "cascade",
+      },
+      quantity: {
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +41,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("cities");
+    await queryInterface.dropTable("order_items");
   },
 };

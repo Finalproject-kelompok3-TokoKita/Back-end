@@ -2,24 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("cities", {
+    await queryInterface.createTable("refreshtokens", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      provinceId: {
+      userId: {
         type: Sequelize.INTEGER,
         references: {
           key: "id",
-          model: "provinces",
+          model: "users",
         },
-        onUpdate: "cascade",
         onDelete: "cascade",
+        onUpdate: "cascade",
       },
-      name: {
-        type: Sequelize.STRING,
+      token: {
+        type: Sequelize.TEXT,
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("cities");
+    await queryInterface.dropTable("refreshtokens");
   },
 };
