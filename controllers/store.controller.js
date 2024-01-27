@@ -18,6 +18,21 @@ const dashboard = async (req, res, next) => {
     next(err);
   }
 };
+const getStore = async (req, res, next) => {
+  try {
+    const resultStore = await store.findAll({
+      attributes: ["id", "phone", "name", "address", "photo", "domain", "cityId", "provinceId", "categoryId"],
+      include: [products, provinces, cities],
+    });
+
+    return res.status(200).json({
+      message: "Successfully",
+      data: resultStore,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const getAll = async (req, res, next) => {
   try {
@@ -204,4 +219,5 @@ module.exports = {
   updateOne,
   deleteOne,
   dashboard,
+  getStore,
 };
