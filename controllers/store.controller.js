@@ -54,7 +54,7 @@ const getOne = async (req, res, next) => {
       where: {
         id: id,
       },
-      include: [users, provinces, cities],
+      include: [users, provinces, cities, products, categories],
     });
 
     return res.status(200).json({
