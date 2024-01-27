@@ -41,7 +41,7 @@ const createOne = async (req, res, next) => {
       quantity,
     });
 
-    const Product = await products.findOne({
+    const Carts = await cart.findOne({
       where: {
         id: cartCreated.id,
       },
@@ -49,7 +49,7 @@ const createOne = async (req, res, next) => {
 
     return res.status(201).json({
       message: "Created",
-      data: Product,
+      data: Carts,
     });
   } catch (err) {
     next(err);
