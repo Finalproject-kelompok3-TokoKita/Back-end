@@ -23,7 +23,9 @@ const getAll = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId } = req.body;
+    const quantity = 1;
+
     const Cart = await cart.findOne({
       where: {
         productId: productId,
@@ -34,6 +36,7 @@ const createOne = async (req, res, next) => {
     if (Cart) {
       throw new BadRequestError("Tidak boleh menambahkan product yang sudah di keranjang");
     }
+
     const cartCreated = await cart.create({
       userId: req.user.id,
       productId,
