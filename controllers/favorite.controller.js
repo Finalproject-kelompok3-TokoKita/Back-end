@@ -1,24 +1,16 @@
-const { users, store, favorite } = require("../models");
+const { users, favorite, store } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
-const getOne = async (req, res, next) => {
+const getAll = async (req, res, next) => {
   try {
-    const { id } = req.params;
     const userId = req.user.id;
     if (userId) {
-      const Favorite = await favorite.findOne({
-        where: {
-          id: id,
-        },
-        include: [users, store],
+      const Favorite = await favorite.findAll({
+        where: { userId },
+        include: [store],
       });
-
-      if (!Favorite) {
-        throw new DataNotFoundError("Favorite tidak ditemukan");
-      }
-
       return res.status(200).json({
-        message: "Scucessfully",
+        message: "Succesfully",
         data: Favorite,
       });
     }
@@ -27,25 +19,29 @@ const getOne = async (req, res, next) => {
   }
 };
 
-const like = async (req, res, next) => {
+const createOne = async (req, res, next) => {
   try {
     const { storeId } = req.body;
 
-    const Like = await favorite.create({
+    const Favorite = await favorite.findOne({
+      where: {
+        storeId: storeId,
+        userId: req.user.id,
+      },
+    });
+
+    if (Favorite) {
+      throw new BadRequestError("Sudah disukai");
+    }
+
+    const favoriteCreated = await favorite.create({
       userId: req.user.id,
       storeId,
     });
 
-    const Favorite = await favorite.findOne({
-      where: {
-        id: Like.id,
-      },
-      include: [users, store],
-    });
-
     return res.status(201).json({
       message: "Created",
-      data: Favorite,
+      data: favoriteCreated,
     });
   } catch (err) {
     next(err);
@@ -53,30 +49,30 @@ const like = async (req, res, next) => {
 };
 const deleteOne = async (req, res, next) => {
   try {
-    const { id } = req.params;
-
-    const Like = await store.findOne({
+    const { storeId } = req.body;
+    const Favorite = await favorite.findOne({
       where: {
-        id: id,
+        storeId: storeId,
+        userId: req.user.id,
       },
     });
 
-    if (!Like) {
-      throw new DataNotFoundError("Suka tidak ditemukan");
+    if (!Favorite) {
+      throw new DataNotFoundError("belum disukai");
     }
 
-    await Like.destroy();
+    await Favorite.destroy();
 
     return res.status(200).json({
       message: "Deleted",
-      data: Like,
+      data: Favorite,
     });
   } catch (err) {
     next(err);
   }
 };
 module.exports = {
-  getOne,
-  like,
+  getAll,
+  createOne,
   deleteOne,
 };

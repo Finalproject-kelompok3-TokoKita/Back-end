@@ -18,6 +18,20 @@ const dashboard = async (req, res, next) => {
     next(err);
   }
 };
+const check = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const resultStore = await store.findOne({
+      where: { userId },
+    });
+    return res.status(200).json({
+      message: "Succesfully",
+      data: resultStore,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 const getStore = async (req, res, next) => {
   try {
     const resultStore = await store.findAll({
@@ -224,4 +238,5 @@ module.exports = {
   deleteOne,
   dashboard,
   getStore,
+  check,
 };

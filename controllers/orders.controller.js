@@ -14,6 +14,29 @@ const getAll = async (req, res, next) => {
     next(err);
   }
 };
+const getUserOrder = async (req, res, next) => {
+  try {
+    const resultOrder = await orders.findAll({
+      where: {
+        userId: req.user.id,
+      },
+
+      include: [
+        users,
+        {
+          model: order_items,
+          include: [products],
+        },
+      ],
+    });
+    return res.status(200).json({
+      message: "Succesfully",
+      data: resultOrder,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const getOne = async (req, res, next) => {
   try {
@@ -216,4 +239,5 @@ module.exports = {
   updateOne,
   deleteOne,
   bayarPembeli,
+  getUserOrder,
 };

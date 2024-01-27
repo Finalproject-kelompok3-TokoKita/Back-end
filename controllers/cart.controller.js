@@ -1,6 +1,4 @@
-const { Op } = require("sequelize");
 const { cart, products } = require("../models");
-const { PasswordUtilities, JWTUtilities } = require("../utils");
 const { BadRequestError, DataNotFoundError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {
