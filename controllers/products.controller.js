@@ -84,6 +84,7 @@ const createOne = async (req, res, next) => {
   try {
     const { name, description, price, quantity } = req.body;
     const userId = req.user.id;
+    const file = req.file;
 
     const userStore = await store.findOne({
       where: {
@@ -101,6 +102,7 @@ const createOne = async (req, res, next) => {
       price,
       quantity,
       storeId: userStore.id,
+      photo: file ? file.storedFilename : null,
     });
 
     const Products = await products.findOne({
@@ -115,6 +117,7 @@ const createOne = async (req, res, next) => {
       data: Products,
     });
   } catch (err) {
+    removePhoto("users", req.file.storedFilename);
     next(err);
   }
 };
@@ -122,6 +125,7 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const file = req.file;
     const { name, description, price, quantity, storeId } = req.body;
 
     if (!name || !description || !price || !quantity || !storeId) {
@@ -153,6 +157,7 @@ const updateOne = async (req, res, next) => {
     resultProducts.price = price;
     resultProducts.quantity = quantity;
     resultProducts.storeId = storeId;
+    resultProducts.photo = file ? file.storedFilename : resultProducts.photo;
     const resultUpdatedProducts = await resultProducts.save();
 
     return res.status(200).json({
@@ -160,6 +165,7 @@ const updateOne = async (req, res, next) => {
       data: resultUpdatedProducts,
     });
   } catch (err) {
+    removePhoto("users", req.file.storedFilename);
     next(err);
   }
 };

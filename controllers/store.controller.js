@@ -69,7 +69,7 @@ const getOne = async (req, res, next) => {
 const createOne = async (req, res, next) => {
   try {
     const { phone, name, address, domain, cityId, provinceId } = req.body;
-
+    const file = req.file;
     // if (!phone || !name || !address || !domain || !cityId || !provinceId) {
     //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     // }
@@ -102,6 +102,7 @@ const createOne = async (req, res, next) => {
       domain,
       cityId,
       provinceId,
+      photo: file ? file.storedFilename : null,
     });
 
     const Store = await store.findOne({
@@ -116,6 +117,7 @@ const createOne = async (req, res, next) => {
       data: Store,
     });
   } catch (err) {
+    removePhoto("users", req.file.storedFilename);
     next(err);
   }
 };
@@ -124,7 +126,7 @@ const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { phone, name, address, domain, cityId, provinceId, categoryId } = req.body;
-
+    const file = req.file;
     // if (!phone || !name || !address || !domain || !cityId || !provinceId) {
     //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     // }
@@ -176,6 +178,7 @@ const updateOne = async (req, res, next) => {
     resultStore.cityId = cityId;
     resultStore.provinceId = provinceId;
     resultStore.categoryId = categoryId;
+    resultStore.photo = file ? file.storedFilename : resultStore.photo;
     const resultUpdatedStore = await resultStore.save();
 
     return res.status(200).json({
@@ -183,6 +186,7 @@ const updateOne = async (req, res, next) => {
       data: resultUpdatedStore,
     });
   } catch (err) {
+    removePhoto("users", req.file.storedFilename);
     next(err);
   }
 };
