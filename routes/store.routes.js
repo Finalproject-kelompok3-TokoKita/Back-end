@@ -6,6 +6,7 @@ const { uploader } = require("../middlewares");
 const { StoreController } = require("../controllers");
 
 router.get("/store", authMiddleware, StoreController.getAll);
+router.get("/check", authMiddleware, StoreController.check); //pengecekan apakah sudah ada toko atau belum jika belum data null
 router.get("/getstore", StoreController.getStore);
 router.get("/dashboard", authMiddleware, StoreController.dashboard);
 router.get("/store/:id(\\d+)", StoreController.getOne);
