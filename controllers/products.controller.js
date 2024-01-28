@@ -27,7 +27,7 @@ const getAll = async (req, res, next) => {
     });
     return res.status(200).json({
       message: "Succesfully",
-      data: id,
+      data: resultProducts,
     });
   } catch (err) {
     next(err);
@@ -128,9 +128,9 @@ const updateOne = async (req, res, next) => {
     const file = req.file;
     const { name, description, price, quantity, storeId } = req.body;
 
-    if (!name || !description || !price || !quantity || !storeId) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    }
+    // if (!name || !description || !price || !quantity || !storeId) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
 
     const resultProducts = await products.findOne({
       where: {
@@ -165,7 +165,7 @@ const updateOne = async (req, res, next) => {
       data: resultUpdatedProducts,
     });
   } catch (err) {
-    removePhoto("users", req.file.storedFilename);
+    // removePhoto("products", req.file.storedFilename);
     next(err);
   }
 };

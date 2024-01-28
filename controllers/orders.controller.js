@@ -63,48 +63,35 @@ const getOne = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    // const { orderProducts } = req.body;
-
-    // // products dari body bentuknya array
-
-    // if (
-    //   !orderProducts ||
-    //   !Array.isArray(orderProducts) ||
-    //   !orderProducts.length
-    // ) {
-    //   throw new BadRequestError(
-    //     "Request yang dikirimkan tidak sesuai dengan yang di izinkan!"
-    //   );
-    // }
     const orderProducts = await cart.findAll({
       where: {
         userId: req.user.id,
       },
+      include: [products], // Include products to get access to product data
     });
 
     if (!orderProducts.length) {
       throw new BadRequestError("tidak ada isi cart");
     }
 
+    let totalPayment = 0;
+
     for (const product of orderProducts) {
-      const item = await products.findOne({
-        where: {
-          id: product.productId,
-        },
-      });
+      const item = product.product; // Access the product data through the association
+      const productPrice = item.price;
+      const productQuantity = product.quantity;
 
-      if (!item) {
-        throw new BadRequestError("Product yang dimaksud tidak ada");
-      }
-
-      if (item.quantity < product.quantity) {
+      if (item.quantity < productQuantity) {
         throw new BadRequestError("Stok habis");
       }
+
+      totalPayment += productPrice * productQuantity;
     }
 
     const ordersCreated = await orders.create({
       userId: req.user.id,
       status: "PENDING",
+      payment: totalPayment, // Set the totalPayment in the orders table
     });
 
     for (const product of orderProducts) {
@@ -113,12 +100,14 @@ const createOne = async (req, res, next) => {
         productId: product.productId,
         quantity: product.quantity,
       });
-      await cart.destroy({
-        where: {
-          userId: req.user.id,
-          productId: product.productId,
-        },
-      });
+
+      // Uncomment the following lines if you want to remove the products from the cart after creating the order
+      // await cart.destroy({
+      //   where: {
+      //     userId: req.user.id,
+      //     productId: product.productId,
+      //   },
+      // });
     }
 
     const Order = await orders.findOne({

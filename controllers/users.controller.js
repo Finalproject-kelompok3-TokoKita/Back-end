@@ -136,9 +136,9 @@ const updateOne = async (req, res, next) => {
     //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     // }
 
-    if (!fullName || !email || !phone) {
-      throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    }
+    // if (!fullName || !email || !phone) {
+    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
+    // }
 
     const resultUsers = await users.findOne({
       where: {
