@@ -1,5 +1,6 @@
 const { provinces, cities, users, store, categories, products , favorite,sequelize} = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
+const { removePhoto } = require("../utils");
 
 const dashboard = async (req, res, next) => {
   try {
@@ -114,30 +115,23 @@ const getOne = async (req, res, next) => {
 const createOne = async (req, res, next) => {
   try {
     const { phone, name, address, domain, cityId, provinceId } = req.body;
-    const file = req.file;
-    // if (!phone || !name || !address || !domain || !cityId || !provinceId) {
-    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    // }
+    const photoFilename = req.file ? req.file.storedFilename : null;
 
-    // const province = await provinces.findOne({
-    //   where: {
-    //     id: provinceId,
-    //   },
-    // });
+    const province = await provinces.findOne({
+      where: { id: provinceId },
+    });
 
-    // if (!province) {
-    //   throw new BadRequestError("Pastikan id provinsi valid");
-    // }
+    if (!province) {
+      throw new BadRequestError("Pastikan id provinsi valid");
+    }
 
-    // const city = await cities.findOne({
-    //   where: {
-    //     id: cityId,
-    //   },
-    // });
+    const city = await cities.findOne({
+      where: { id: cityId },
+    });
 
-    // if (!city) {
-    //   throw new BadRequestError("Pastikan id provinsi valid");
-    // }
+    if (!city) {
+      throw new BadRequestError("Pastikan id kota valid");
+    }
 
     const storeCreated = await store.create({
       userId: req.user.id,
@@ -147,34 +141,41 @@ const createOne = async (req, res, next) => {
       domain,
       cityId,
       provinceId,
-      photo: file ? file.storedFilename : null,
+      photo: photoFilename,
     });
 
+    if (!storeCreated) {
+      throw new Error("Gagal membuat toko");
+    }
+
     const Store = await store.findOne({
-      where: {
-        id: storeCreated.id,
-      },
+      where: { id: storeCreated.id },
       include: [users, provinces, cities],
     });
+
+    if (!Store) {
+      throw new Error("Toko tidak ditemukan setelah pembuatan");
+    }
 
     return res.status(201).json({
       message: "Created",
       data: Store,
     });
   } catch (err) {
-    removePhoto("users", req.file.storedFilename);
+    if (req.file && req.file.storedFilename) {
+      removePhoto("store", req.file.storedFilename);
+    }
+
     next(err);
   }
 };
+
 
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { phone, name, address, domain, cityId, provinceId, categoryId } = req.body;
-    const file = req.file;
-    // if (!phone || !name || !address || !domain || !cityId || !provinceId) {
-    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    // }
+    const photoFilename = req.file ? req.file.storedFilename : null;
 
     const city = await cities.findOne({
       where: {
@@ -195,15 +196,16 @@ const updateOne = async (req, res, next) => {
     if (!province) {
       throw new BadRequestError("Pastikan id provinsi valid");
     }
-    const category = await provinces.findOne({
-      where: {
-        id: categoryId,
-      },
-    });
 
-    if (!category) {
-      throw new BadRequestError("Pastikan id category valid");
-    }
+    // const category = await categories.findOne({
+    //   where: {
+    //     id: categoryId,
+    //   },
+    // });
+
+    // if (!category) {
+    //   throw new BadRequestError("Pastikan id category valid");
+    // }
 
     const resultStore = await store.findOne({
       where: {
@@ -214,7 +216,7 @@ const updateOne = async (req, res, next) => {
     if (!resultStore) {
       throw new DataNotFoundError("Store tidak ditemukan");
     }
-
+    const oldPhotoFilename = resultStore.photo;
     resultStore.userId = req.user.id;
     resultStore.phone = phone;
     resultStore.name = name;
@@ -223,18 +225,26 @@ const updateOne = async (req, res, next) => {
     resultStore.cityId = cityId;
     resultStore.provinceId = provinceId;
     resultStore.categoryId = categoryId;
-    resultStore.photo = file ? file.storedFilename : resultStore.photo;
+    resultStore.photo = photoFilename || resultStore.photo;
+
     const resultUpdatedStore = await resultStore.save();
+     if (resultUpdatedStore && oldPhotoFilename && oldPhotoFilename !== photoFilename) {
+      removePhoto("stores", oldPhotoFilename);
+    }
 
     return res.status(200).json({
       message: "Updated",
       data: resultUpdatedStore,
     });
   } catch (err) {
-    removePhoto("users", req.file.storedFilename);
+    if (req.file && req.file.storedFilename) {
+      removePhoto("stores", req.file.storedFilename);
+    }
     next(err);
   }
 };
+
+
 
 const deleteOne = async (req, res, next) => {
   try {
@@ -249,8 +259,12 @@ const deleteOne = async (req, res, next) => {
     if (!resultStore) {
       throw new DataNotFoundError("Toko tidak ditemukan");
     }
+    const oldPhotoFilename = resultStore.photo;
 
     await resultStore.destroy();
+    if (oldPhotoFilename) {
+      removePhoto("stores", oldPhotoFilename);
+    }
 
     return res.status(200).json({
       message: "Deleted",
@@ -260,6 +274,7 @@ const deleteOne = async (req, res, next) => {
     next(err);
   }
 };
+
 
 module.exports = {
   getAll,

@@ -1,23 +1,39 @@
 const { store, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
+const { removePhoto } = require("../utils");
 
-// const getAll = async (req, res, next) => {
-//   try {
-//     const storeId = req.store.id;
-//     if (storeId) {
-//       const resultProducts = await products.findAll({
-//         where: { storeId },
-//         include: [store],
-//       });
-//       return res.status(200).json({
-//         message: "Succesfully",
-//         data: resultProducts,
-//       });
-//     }
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+const getProductsByUserId = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const userStore = await store.findOne({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!userStore) {
+      return res.status(404).json({
+        message: "Store not found for the given user",
+        data: null,
+      });
+    }
+
+    const resultProducts = await products.findAll({
+      where: {
+        storeId: userStore.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Successfully",
+      data: resultProducts,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 const getAll = async (req, res, next) => {
   try {
@@ -84,7 +100,7 @@ const createOne = async (req, res, next) => {
   try {
     const { name, description, price, quantity } = req.body;
     const userId = req.user.id;
-    const file = req.file;
+    const photoFilename = req.file ? req.file.storedFilename : null;
 
     const userStore = await store.findOne({
       where: {
@@ -102,7 +118,7 @@ const createOne = async (req, res, next) => {
       price,
       quantity,
       storeId: userStore.id,
-      photo: file ? file.storedFilename : null,
+      photo: photoFilename,
     });
 
     const Products = await products.findOne({
@@ -117,7 +133,10 @@ const createOne = async (req, res, next) => {
       data: Products,
     });
   } catch (err) {
-    removePhoto("users", req.file.storedFilename);
+    if (req.file && req.file.storedFilename) {
+      removePhoto("products", req.file.storedFilename);
+    }
+
     next(err);
   }
 };
@@ -125,7 +144,8 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const file = req.file;
+    const userId = req.user.id;
+    const photoFilename = req.file ? req.file.storedFilename : null;
     const { name, description, price, quantity, storeId } = req.body;
 
     // if (!name || !description || !price || !quantity || !storeId) {
@@ -141,31 +161,35 @@ const updateOne = async (req, res, next) => {
     if (!resultProducts) {
       throw new DataNotFoundError("Product tidak ditemukan");
     }
-
-    const Store = await store.findOne({
+    const userStore = await store.findOne({
       where: {
-        id: storeId,
+        userId,
       },
     });
 
-    if (!Store) {
-      throw new BadRequestError("Pastikan id store valid");
+    if (!userStore) {
+      throw new BadRequestError("Kamu tidak memiliki toko!");
     }
 
+    const oldPhotoFilename = resultProducts.photo;
     resultProducts.name = name;
     resultProducts.description = description;
     resultProducts.price = price;
     resultProducts.quantity = quantity;
-    resultProducts.storeId = storeId;
-    resultProducts.photo = file ? file.storedFilename : resultProducts.photo;
-    const resultUpdatedProducts = await resultProducts.save();
-
+    resultProducts.storeId = userStore.id;
+    resultProducts.photo = photoFilename || resultProducts.photo;
+    const resultUpdatedProduct = await resultProducts.save();
+    if (resultUpdatedProduct && oldPhotoFilename && oldPhotoFilename !== photoFilename) {
+     removePhoto("products", oldPhotoFilename);
+   }
     return res.status(200).json({
       message: "Updated",
-      data: resultUpdatedProducts,
+      data: resultUpdatedProduct,
     });
   } catch (err) {
-    // removePhoto("products", req.file.storedFilename);
+    if (req.file && req.file.storedFilename) {
+      removePhoto("products", req.file.storedFilename);
+    }
     next(err);
   }
 };
@@ -183,9 +207,11 @@ const deleteOne = async (req, res, next) => {
     if (!resultProducts) {
       throw new DataNotFoundError("Product tidak ditemukan");
     }
-
+    const oldPhotoFilename = resultProducts.photo;
     await resultProducts.destroy();
-
+    if (oldPhotoFilename) {
+      removePhoto("products", oldPhotoFilename);
+    }
     return res.status(200).json({
       message: "Deleted",
       data: resultProducts,
@@ -202,4 +228,5 @@ module.exports = {
   createOne,
   updateOne,
   deleteOne,
+  getProductsByUserId,
 };

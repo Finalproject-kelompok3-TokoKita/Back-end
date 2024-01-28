@@ -1,5 +1,6 @@
 const multer = require("multer");
 const path = require("path");
+
 const uploader = (directory) => {
   return multer({
     storage: multer.diskStorage({
@@ -20,6 +21,12 @@ const uploader = (directory) => {
     }),
     fileFilter: function (req, file, cb) {
       console.log("File Filter Metadata", file);
+
+      // Cek apakah ukuran file melebihi batas tertentu (misalnya, 5MB)
+      if (file.size > 5242880) {
+        return cb(new Error("Ukuran file terlalu besar. Maksimal 5MB."));
+      }
+
       if (
         !["image/png", "image/jpeg", "image/jpg"].includes(file.mimetype) ||
         !["png", "jpg", "jpeg"].find((ext) => file.originalname.endsWith(ext))
@@ -31,7 +38,7 @@ const uploader = (directory) => {
       cb(null, true);
     },
     limits: {
-      fileSize: 2097152,
+      fileSize: 5242880, // 5MB dalam byte
     },
   });
 };

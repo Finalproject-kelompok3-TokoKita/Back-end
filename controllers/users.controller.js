@@ -70,7 +70,7 @@ const getByID = async (req, res, next) => {
 const createOne = async (req, res, next) => {
   try {
     const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
-    const file = req.file;
+    const photoFilename = req.file ? req.file.storedFilename : null;
 
     // if (!fullName || !email || !phone || !password || !dateOfBirth || !address || !cityId || !provinceId || !gender) {
     //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
@@ -106,7 +106,7 @@ const createOne = async (req, res, next) => {
       cityId,
       provinceId,
       gender,
-      photo: file ? file.storedFilename : null,
+      photo: photoFilename,
     });
 
     const user = await users.findOne({
@@ -121,6 +121,9 @@ const createOne = async (req, res, next) => {
       data: user,
     });
   } catch (err) {
+    if (req.file && req.file.storedFilename) {
+      removePhoto("users", req.file.storedFilename);
+    }
     next(err);
   }
 };
@@ -128,17 +131,13 @@ const createOne = async (req, res, next) => {
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
-    //const { fullName, email, phone, password, dateOfBirth, address, cityId, provinceId, gender } = req.body;
     const { fullName, dateOfBirth, gender, email, phone, address, cityId, provinceId } = req.body;
-    const file = req.file;
+    const photoFilename = req.file ? req.file.storedFilename : null;
 
     // if (!fullName || !email || !phone || !cityId || !provinceId) {
     //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     // }
 
-    // if (!fullName || !email || !phone) {
-    //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
-    // }
 
     const resultUsers = await users.findOne({
       where: {
@@ -150,48 +149,49 @@ const updateOne = async (req, res, next) => {
       throw new DataNotFoundError("User tidak ditemukan");
     }
 
-    // const province = await provinces.findOne({
-    //   where: {
-    //     id: provinceId,
-    //   },
-    // });
+    const province = await provinces.findOne({
+      where: {
+        id: provinceId,
+      },
+    });
 
-    // if (!province) {
-    //   throw new BadRequestError("Pastikan id provinsi valid");
-    // }
-
-    // const city = await cities.findOne({
-    //   where: {
-    //     id: cityId,
-    //   },
-    // });
-
-    // if (!city) {
-    //   throw new BadRequestError("Pastikan id provinsi valid");
-    // }
-
-    if (file && resultUsers.photo) {
-      removePhoto("users", resultUsers.photo);
+    if (!province) {
+      throw new BadRequestError("Pastikan id provinsi valid");
     }
 
+    const city = await cities.findOne({
+      where: {
+        id: cityId,
+      },
+    });
+
+    if (!city) {
+      throw new BadRequestError("Pastikan id provinsi valid");
+    }
+    const oldPhotoFilename = resultUsers.photo;
     resultUsers.fullName = fullName;
     resultUsers.dateOfBirth = dateOfBirth;
     resultUsers.gender = gender;
     resultUsers.email = email;
     resultUsers.phone = phone;
-    // resultUsers.password = password;
     resultUsers.address = address;
-    //resultUsers.cityId = cityId;
-    //resultUsers.provinceId = provinceId;
-    resultUsers.photo = file ? file.storedFilename : resultUsers.photo;
-    const resultUpdatedUsers = await resultUsers.save();
+    resultUsers.cityId = cityId;
+    resultUsers.provinceId = provinceId;
+    resultUsers.photo = photoFilename || resultUsers.photo;
 
+    const resultUpdatedUsers = await resultUsers.save();
+    if (resultUpdatedUsers && oldPhotoFilename && oldPhotoFilename !== photoFilename) {
+     removePhoto("users", oldPhotoFilename);
+   }
     return res.status(200).json({
       message: "Updated",
       data: resultUpdatedUsers,
     });
   } catch (err) {
     removePhoto("users", req.file.storedFilename);
+    if (req.file && req.file.storedFilename) {
+      removePhoto("users", req.file.storedFilename);
+    }
     next(err);
   }
 };
@@ -209,12 +209,13 @@ const deleteOne = async (req, res, next) => {
     if (!resultUsers) {
       throw new DataNotFoundError("User tidak ditemukan");
     }
+    const oldPhotoFilename = resultUsers.photo;
 
-    if (resultUsers.photo) {
-      removePhoto("users", resultUsers.photo);
-    }
 
     await resultUsers.destroy();
+    if (oldPhotoFilename) {
+      removePhoto("stores", oldPhotoFilename);
+    }
 
     return res.status(200).json({
       message: "Deleted",
