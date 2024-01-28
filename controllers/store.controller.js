@@ -1,4 +1,4 @@
-const { provinces, cities, users, store, categories, products } = require("../models");
+const { provinces, cities, users, store, categories, products , favorite,sequelize} = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const dashboard = async (req, res, next) => {
@@ -48,6 +48,37 @@ const getStore = async (req, res, next) => {
   }
 };
 
+const getMostLikedStores = async (req, res, next) => {
+  try {
+    const mostLikedStores = await store.findAll({
+      attributes: [
+        "id",
+        "name",
+        [sequelize.fn("COUNT", sequelize.col("favorites.id")), "likeCount"],
+      ],
+      include: [
+        {
+          model: favorite,
+          attributes: [],
+          duplicating: false,
+        },
+      ],
+      group: ["store.id"],
+      order: [[sequelize.literal("likeCount"), "DESC"]],
+    });
+
+    if (!mostLikedStores || mostLikedStores.length === 0) {
+      throw new DataNotFoundError("No liked stores found");
+    }
+
+    return res.status(200).json({
+      message: "Successfully",
+      data: mostLikedStores,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 const getAll = async (req, res, next) => {
   try {
     const resultStore = await store.findAll();
@@ -239,4 +270,5 @@ module.exports = {
   dashboard,
   getStore,
   check,
+  getMostLikedStores,
 };
