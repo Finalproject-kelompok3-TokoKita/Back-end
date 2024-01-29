@@ -1,4 +1,4 @@
-const { provinces, cities, users, store, categories, products , favorite,sequelize} = require("../models");
+const { provinces, cities, users, store, categories, products, favorite, sequelize } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 const { removePhoto } = require("../utils");
 
@@ -48,6 +48,29 @@ const getStore = async (req, res, next) => {
     next(err);
   }
 };
+
+const getStorebycity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const resultstore = await store.findAll({
+      where: {
+        cityId: id,
+      },
+      include: [city]
+    });
+
+    if (!resultstore) {
+      throw new DataNotFoundError('Kota yang anda cari tidak ditemukan!')
+    }
+
+    return res.status(200).json({
+      message: 'Scucessfully',
+      data: resultstore,
+    })
+  } catch (err) {
+    next(err)
+  }
+}
 
 const getMostLikedStores = async (req, res, next) => {
   try {
@@ -232,8 +255,8 @@ const updateOne = async (req, res, next) => {
 
     const resultUpdatedStore = await resultStore.save();
     if (resultUpdatedStore && oldPhotoFilename && oldPhotoFilename !== photoFilename) {
-     removePhoto("stores", oldPhotoFilename);
-   }
+      removePhoto("stores", oldPhotoFilename);
+    }
 
     return res.status(200).json({
       message: "Updated",
@@ -286,6 +309,7 @@ module.exports = {
   updateOne,
   deleteOne,
   dashboard,
+  getStorebycity,
   getStore,
   check,
   getMostLikedStores,

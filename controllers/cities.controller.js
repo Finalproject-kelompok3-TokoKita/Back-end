@@ -14,25 +14,49 @@ const getAll = async (req, res, next) => {
         next(err);
     }
 };
+
+// const getByProvince = async (req, res, next) => {
+//     try {
+//         const id = req.params.id;
+
+//         const resultCities = await provinces.findOne({
+//             where: {
+//                 id: id,
+//             },
+//             include: [cities],
+//         });
+
+//         return res.status(200).json({
+//             message: "Scucessfully",
+//             data: resultCities,
+//         });
+//     } catch (err) {
+//         next(err);
+//     }
+// };
+
 const getByProvince = async (req, res, next) => {
     try {
-      const id = req.params.id;
-  
-      const resultCities = await provinces.findOne({
-        where: {
-          id: id,
-        },
-        include: [cities],
-      });
-  
-      return res.status(200).json({
-        message: "Scucessfully",
-        data: resultCities,
-      });
+        const { id } = req.params;
+        const resultCities = await cities.findAll({
+            where: {
+                provinceId: id,
+            },
+            include: [provinces]
+        });
+
+        if (!resultCities) {
+            throw new DataNotFoundError('Kota yang anda cari tidak ditemukan!')
+        }
+
+        return res.status(200).json({
+            message: 'Scucessfully',
+            data: resultCities,
+        })
     } catch (err) {
-      next(err);
+        next(err)
     }
-  };
+}
 
 const getOne = async (req, res, next) => {
     try {
@@ -46,7 +70,7 @@ const getOne = async (req, res, next) => {
 
         if (!resultCities) {
             throw new DataNotFoundError('Kota yang anda cari tidak ditemukan!')
-        } 
+        }
 
         return res.status(200).json({
             message: 'Scucessfully',
@@ -104,7 +128,7 @@ const updateOne = async (req, res, next) => {
         if (!name || !provinceId) {
             throw new BadRequestError('Pastikan name dan province Id tidak kosong!');
         }
-        
+
         const city = await cities.findOne({
             where: {
                 id: id,
@@ -148,7 +172,7 @@ const updateOne = async (req, res, next) => {
 const deleteOne = async (req, res, next) => {
     try {
         const { id } = req.params;
-        
+
         const city = await cities.findOne({
             where: {
                 id,

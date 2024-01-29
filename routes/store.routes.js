@@ -10,6 +10,7 @@ router.get("/check", authMiddleware, StoreController.check); //pengecekan apakah
 router.get("/getstore", StoreController.getStore);
 router.get("/getfavorite", StoreController.getMostLikedStores);
 router.get("/dashboard", authMiddleware, StoreController.dashboard);
+router.get("/storebycity/:id(\\d+)", StoreController.getStorebycity);
 router.get("/store/:id(\\d+)", StoreController.getOne);
 router.post("/store", uploader("stores").single("file"), authMiddleware, StoreController.createOne);
 router.put("/store/:id(\\d+)", uploader("stores").single("file"), authMiddleware, StoreController.updateOne);
