@@ -14,6 +14,25 @@ const getAll = async (req, res, next) => {
         next(err);
     }
 };
+const getByProvince = async (req, res, next) => {
+    try {
+      const id = req.params.id;
+  
+      const resultCities = await provinces.findOne({
+        where: {
+          id: id,
+        },
+        include: [cities],
+      });
+  
+      return res.status(200).json({
+        message: "Scucessfully",
+        data: resultCities,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 
 const getOne = async (req, res, next) => {
     try {
@@ -157,5 +176,6 @@ module.exports = {
     getOne,
     createOne,
     updateOne,
-    deleteOne
+    deleteOne,
+    getByProvince,
 }

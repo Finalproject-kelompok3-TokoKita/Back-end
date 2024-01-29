@@ -5,7 +5,7 @@ const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 const getAll = async (req, res, next) => {
   try {
     const resultUsers = await users.findAll({
-      include: [store, provinces, cities],
+      include: [ provinces, cities],
     });
     return res.status(200).json({
       message: "Succesfully",
@@ -76,25 +76,25 @@ const createOne = async (req, res, next) => {
     //   throw new BadRequestError("Pastikan tidak ada field yang kosong!");
     // }
 
-    const province = await provinces.findOne({
-      where: {
-        id: provinceId,
-      },
-    });
+    // const province = await provinces.findOne({
+    //   where: {
+    //     id: provinceId,
+    //   },
+    // });
 
-    if (!province) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!province) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
-    const city = await cities.findOne({
-      where: {
-        id: cityId,
-      },
-    });
+    // const city = await cities.findOne({
+    //   where: {
+    //     id: cityId,
+    //   },
+    // });
 
-    if (!city) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!city) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
     const userCreated = await users.create({
       fullName,
@@ -217,7 +217,7 @@ const deleteOne = async (req, res, next) => {
 
     await resultUsers.destroy();
     if (oldPhotoFilename) {
-      removePhoto("stores", oldPhotoFilename);
+      removePhoto("users", oldPhotoFilename);
     }
 
     return res.status(200).json({

@@ -4,8 +4,9 @@ const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const PORT = process.env.APP_PORT || 3001;
+// const fs = require("fs"); 
 
-//app.use(express.static('public'))
+app.use("/static",express.static('public'))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(

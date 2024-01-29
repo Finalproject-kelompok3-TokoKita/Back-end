@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const multer = require("multer");
 const router = Router();
 
 const routes = [
@@ -18,12 +19,12 @@ const routes = [
 routes.forEach((route) => router.use(route));
 
 router.use((err, req, res, next) => {
-  if (!err.code || !err.name) {
+  if (typeof err.code === 'string' || !err.code || !err.name) {
     err.code = 500;
     err.name = "Internal Server Error";
   }
 
-  res.status(err.code).json({
+  return res.status(err.code).json({
     code: err.code,
     name: err.name,
     message: err.message,
