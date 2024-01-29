@@ -169,6 +169,9 @@ const updateOne = async (req, res, next) => {
       throw new BadRequestError("Pastikan id provinsi valid");
     }
     const oldPhotoFilename = resultUsers.photo;
+    if (req.file) {
+      resultUsers.photo = photoFilename;
+    }
     resultUsers.fullName = fullName;
     resultUsers.dateOfBirth = dateOfBirth;
     resultUsers.gender = gender;

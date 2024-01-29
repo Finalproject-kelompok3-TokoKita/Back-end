@@ -170,7 +170,6 @@ const createOne = async (req, res, next) => {
   }
 };
 
-
 const updateOne = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -196,16 +195,15 @@ const updateOne = async (req, res, next) => {
     if (!province) {
       throw new BadRequestError("Pastikan id provinsi valid");
     }
+    const category = await categories.findOne({
+      where: {
+        id: categoryId,
+      },
+    });
 
-    // const category = await categories.findOne({
-    //   where: {
-    //     id: categoryId,
-    //   },
-    // });
-
-    // if (!category) {
-    //   throw new BadRequestError("Pastikan id category valid");
-    // }
+    if (!category) {
+      throw new BadRequestError("Pastikan category provinsi valid");
+    }
 
     const resultStore = await store.findOne({
       where: {
@@ -216,7 +214,12 @@ const updateOne = async (req, res, next) => {
     if (!resultStore) {
       throw new DataNotFoundError("Store tidak ditemukan");
     }
+
     const oldPhotoFilename = resultStore.photo;
+    if (req.file) {
+      resultStore.photo = photoFilename;
+    }
+
     resultStore.userId = req.user.id;
     resultStore.phone = phone;
     resultStore.name = name;
@@ -228,9 +231,9 @@ const updateOne = async (req, res, next) => {
     resultStore.photo = photoFilename || resultStore.photo;
 
     const resultUpdatedStore = await resultStore.save();
-     if (resultUpdatedStore && oldPhotoFilename && oldPhotoFilename !== photoFilename) {
-      removePhoto("stores", oldPhotoFilename);
-    }
+    if (resultUpdatedStore && oldPhotoFilename && oldPhotoFilename !== photoFilename) {
+     removePhoto("stores", oldPhotoFilename);
+   }
 
     return res.status(200).json({
       message: "Updated",
