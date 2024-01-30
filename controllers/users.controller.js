@@ -149,25 +149,25 @@ const updateOne = async (req, res, next) => {
       throw new DataNotFoundError("User tidak ditemukan");
     }
 
-    const province = await provinces.findOne({
-      where: {
-        id: provinceId,
-      },
-    });
+    // const province = await provinces.findOne({
+    //   where: {
+    //     id: provinceId,
+    //   },
+    // });
 
-    if (!province) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!province) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
 
-    const city = await cities.findOne({
-      where: {
-        id: cityId,
-      },
-    });
+    // const city = await cities.findOne({
+    //   where: {
+    //     id: cityId,
+    //   },
+    // });
 
-    if (!city) {
-      throw new BadRequestError("Pastikan id provinsi valid");
-    }
+    // if (!city) {
+    //   throw new BadRequestError("Pastikan id provinsi valid");
+    // }
     const oldPhotoFilename = resultUsers.photo;
     if (req.file) {
       resultUsers.photo = photoFilename;
