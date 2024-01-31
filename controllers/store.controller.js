@@ -8,7 +8,7 @@ const dashboard = async (req, res, next) => {
     if (userId) {
       const resultStore = await store.findAll({
         where: { userId },
-        include: [provinces, cities, products],
+        include: [provinces, cities, products, categories],
       });
       return res.status(200).json({
         message: "Succesfully",
@@ -49,14 +49,38 @@ const getStore = async (req, res, next) => {
   }
 };
 
+// const getStorebycity = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const resultstore = await store.findAll({
+//       where: {
+//         cityId: id,
+//       },
+//       include: [city]
+//     });
+
+//     if (!resultstore) {
+//       throw new DataNotFoundError('Kota yang anda cari tidak ditemukan!')
+//     }
+
+//     return res.status(200).json({
+//       message: 'Scucessfully',
+//       data: resultstore,
+//     })
+//   } catch (err) {
+//     next(err)
+//   }
+// }
+
 const getStorebycity = async (req, res, next) => {
   try {
     const { id } = req.params;
+    //const id = req.params.id;
     const resultstore = await store.findAll({
       where: {
         cityId: id,
       },
-      include: [city]
+      include: [cities]
     });
 
     if (!resultstore) {
@@ -137,7 +161,7 @@ const getOne = async (req, res, next) => {
 
 const createOne = async (req, res, next) => {
   try {
-    const { phone, name, address, domain, cityId, provinceId } = req.body;
+    const { phone, name, address, domain, cityId, provinceId, categoryId } = req.body;
     const photoFilename = req.file ? req.file.storedFilename : null;
 
     const province = await provinces.findOne({
@@ -164,6 +188,7 @@ const createOne = async (req, res, next) => {
       domain,
       cityId,
       provinceId,
+      categoryId,
       photo: photoFilename,
     });
 
