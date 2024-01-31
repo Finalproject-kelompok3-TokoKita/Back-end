@@ -89,7 +89,7 @@ const getOne = async (req, res, next) => {
 
     return res.status(200).json({
       message: "Scucessfully",
-      data: id,
+      data: resultProducts,
     });
   } catch (err) {
     next(err);
