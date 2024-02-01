@@ -1,4 +1,4 @@
-const { order_items, orders, products } = require("../models");
+const { users, order_items, orders, products } = require("../models");
 const { DataNotFoundError, BadRequestError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {

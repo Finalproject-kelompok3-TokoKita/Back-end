@@ -1,4 +1,4 @@
-const { cart, products } = require("../models");
+const { cart, products, order_items, orders } = require("../models");
 const { BadRequestError, DataNotFoundError } = require("../utils/errors");
 
 const getAll = async (req, res, next) => {
@@ -12,6 +12,23 @@ const getAll = async (req, res, next) => {
       return res.status(200).json({
         message: "Succesfully",
         data: Cart,
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getPesanan = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    if (userId) {
+      const orderlist = await orders.findAll({
+        where: { userId },
+      });
+      return res.status(200).json({
+        message: "Succesfully",
+        data: orderlist,
       });
     }
   } catch (err) {
@@ -106,6 +123,7 @@ const deleteOne = async (req, res, next) => {
 };
 module.exports = {
   getAll,
+  getPesanan,
   createOne,
   updateOne,
   deleteOne,
