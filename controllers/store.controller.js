@@ -37,7 +37,7 @@ const getStore = async (req, res, next) => {
   try {
     const resultStore = await store.findAll({
       attributes: ["id", "phone", "name", "address", "photo", "domain", "cityId", "provinceId", "categoryId"],
-      include: [products, provinces, cities],
+      include: [categories, provinces, cities],
     });
 
     return res.status(200).json({
@@ -80,7 +80,7 @@ const getStorebycity = async (req, res, next) => {
       where: {
         cityId: id,
       },
-      include: [cities]
+      include: [cities, provinces ]
     });
 
     if (!resultstore) {
