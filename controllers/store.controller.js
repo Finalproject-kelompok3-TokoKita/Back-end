@@ -49,29 +49,6 @@ const getStore = async (req, res, next) => {
   }
 };
 
-// const getStorebycity = async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-//     const resultstore = await store.findAll({
-//       where: {
-//         cityId: id,
-//       },
-//       include: [city]
-//     });
-
-//     if (!resultstore) {
-//       throw new DataNotFoundError('Kota yang anda cari tidak ditemukan!')
-//     }
-
-//     return res.status(200).json({
-//       message: 'Scucessfully',
-//       data: resultstore,
-//     })
-//   } catch (err) {
-//     next(err)
-//   }
-// }
-
 const getStorebycity = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -80,7 +57,7 @@ const getStorebycity = async (req, res, next) => {
       where: {
         cityId: id,
       },
-      include: [cities, provinces ]
+      include: [cities, provinces, categories]
     });
 
     if (!resultstore) {
