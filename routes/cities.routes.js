@@ -6,8 +6,8 @@ const { CitiesController } = require('../controllers');
 router.get('/cities', CitiesController.getAll);
 router.get('/city/:id(\\d+)', CitiesController.getByProvince);
 router.get('/cities/:id(\\d+)', CitiesController.getOne);
-router.post('/cities', CitiesController.createOne);
-router.put('/cities/:id(\\d+)', CitiesController.updateOne);
-router.delete('/cities/:id(\\d+)', CitiesController.deleteOne);
+// router.post('/cities', CitiesController.createOne);
+// router.put('/cities/:id(\\d+)', CitiesController.updateOne);
+// router.delete('/cities/:id(\\d+)', CitiesController.deleteOne);
 
 module.exports = router;
