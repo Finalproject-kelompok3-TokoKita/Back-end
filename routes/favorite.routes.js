@@ -6,6 +6,5 @@ const { FavoriteController } = require("../controllers");
 
 router.get("/like", authMiddleware, FavoriteController.getAll);
 router.post("/like", authMiddleware, FavoriteController.createOne);
-// router.delete("/like", authMiddleware, FavoriteController.deleteOne);
 
 module.exports = router;

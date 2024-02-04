@@ -14,6 +14,5 @@ router.get("/storebycity/:id(\\d+)", StoreController.getStorebycity);
 router.get("/store/:id(\\d+)", StoreController.getOne);
 router.post("/store", uploader("stores").single("file"), authMiddleware, StoreController.createOne);
 router.put("/store/:id(\\d+)", uploader("stores").single("file"), authMiddleware, StoreController.updateOne);
-// router.delete("/store/:id(\\d+)", StoreController.deleteOne);
 
 module.exports = router;
